@@ -1,0 +1,18 @@
+{
+ "name": "德生2P3收音机",
+ "short_name": "2P3收音机",
+ "start_url": "./",
+ "scope": "./",
+ "display": "fullscreen",
+ "orientation": "any",
+ "background_color": "#171513",
+ "theme_color": "#171513",
+ "lang": "zh-CN",
+ "icons": [
+  {
+   "src": "apple-touch-icon.png",
+   "sizes": "180x180",
+   "type": "image/png"
+  }
+ ]
+}
