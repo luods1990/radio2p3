@@ -1,0 +1,2250 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="2P3收音机">
+<meta name="theme-color" content="#171513">
+<link rel="apple-touch-icon" href="../../apple-touch-icon.png">
+<link rel="icon" type="image/png" href="../../apple-touch-icon.png">
+<link rel="manifest" href="../../manifest.webmanifest">
+<title>德生 2P3 分解结构图</title>
+<style>
+:root{
+  --bg:#2c2926; --bg2:#171513; --bg3:#0c0b0a; --panel:rgba(28,26,24,.84); --panel-solid:#1f1d1b;
+  --ink:#ebe6de; --muted:#a39d94; --faint:#6f6a63; --line:rgba(255,245,230,.09);
+  --accent:#e0583f; --accent-soft:rgba(224,88,63,.16);
+  --rf:#7aa7f0; --if:#b394f0; --af:#f0a458; --dc:#6cc893; --mech:#a09a90;
+  --shadow:0 12px 34px rgba(0,0,0,.45);
+  --r:14px;
+  color-scheme: dark;
+}
+:root[data-theme="light"]{
+  --bg:#d9d4ca; --bg2:#bfb8ac; --bg3:#a59e92; --panel:rgba(236,232,225,.86); --panel-solid:#ece8e1;
+  --ink:#1f1d1a; --muted:#5f5a53; --faint:#8a847b; --line:rgba(30,25,20,.12);
+  --accent:#b8331f; --accent-soft:rgba(184,51,31,.12);
+  --rf:#2f64c4; --if:#7a48c4; --af:#c96a14; --dc:#2a8a52; --mech:#6b665e;
+  --shadow:0 10px 28px rgba(40,30,20,.18);
+  color-scheme: light;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden}
+body{
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC","Segoe UI",sans-serif;
+  color:var(--ink);
+  background: radial-gradient(85% 75% at 58% 46%, var(--bg) 0%, var(--bg2) 62%, var(--bg3) 100%);
+  -webkit-font-smoothing:antialiased;
+}
+#c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;outline:none}
+button{font:inherit;color:inherit}
+.panel{background:var(--panel);backdrop-filter:blur(14px) saturate(1.2);-webkit-backdrop-filter:blur(14px) saturate(1.2);
+  border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+.hidden{display:none!important}
+
+/* header */
+#top{position:fixed;left:16px;top:14px;display:flex;align-items:center;gap:12px;z-index:5;pointer-events:none}
+#top .mark{width:38px;height:38px;border-radius:10px;background:var(--accent);display:grid;place-items:center;color:#fff;font-weight:800;font-size:13px;letter-spacing:.5px;box-shadow:var(--shadow)}
+#top h1{margin:0;font-size:17px;font-weight:700;letter-spacing:.3px}
+#top p{margin:2px 0 0;font-size:12px;color:var(--muted)}
+#themeBtn{position:fixed;right:16px;top:14px;z-index:6;width:36px;height:36px;border-radius:10px;cursor:pointer;display:grid;place-items:center}
+
+/* parts panel */
+#parts{position:fixed;left:16px;top:70px;bottom:132px;width:252px;z-index:4;display:flex;flex-direction:column;overflow:hidden}
+#parts .ph{display:flex;align-items:center;justify-content:space-between;padding:12px 14px 8px;border-bottom:1px solid var(--line)}
+#parts .ph b{font-size:13px}
+#parts .ph span{font-size:11px;color:var(--muted)}
+#partsList{overflow:auto;padding:6px 6px 12px;scrollbar-width:thin}
+.grp{margin-top:6px}
+.grp>h4{margin:8px 8px 4px;font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.5px;display:flex;align-items:center;gap:6px}
+.grp>h4 i{width:8px;height:8px;border-radius:50%;display:inline-block}
+.pi{display:flex;align-items:center;gap:8px;width:100%;border:0;background:none;text-align:left;padding:5px 8px;border-radius:8px;cursor:pointer;font-size:12.5px;line-height:1.3}
+.pi:hover{background:var(--accent-soft)}
+.pi.on{background:var(--accent);color:#fff}
+.pi .d{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10.5px;color:var(--faint);min-width:30px}
+.pi.on .d{color:rgba(255,255,255,.8)}
+#partsToggle{display:none}
+#parts{transition:transform .32s cubic-bezier(.3,.7,.2,1), opacity .25s}
+#parts.hid{transform:translateX(calc(-100% - 24px));opacity:0;pointer-events:none}
+#parts .phr{display:flex;align-items:center;gap:8px}
+#pHide{border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:7px;width:24px;height:22px;cursor:pointer;font-size:13px;line-height:1;padding:0}
+#pHide:hover{color:var(--ink);border-color:var(--accent)}
+#pTab{position:fixed;left:0;top:50%;transform:translate(-110%,-50%);z-index:5;border-radius:0 12px 12px 0;border-left:0;padding:12px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;width:40px;color:var(--ink);transition:transform .3s cubic-bezier(.3,.7,.2,1)}
+#pTab.show{transform:translate(0,-50%)}
+#pTab b{font-size:12px;writing-mode:vertical-rl;letter-spacing:2px;font-weight:600}
+#pTab .ar{font-size:12px;color:var(--faint)}
+#pTab:hover{border-color:var(--accent)}
+#toast{position:fixed;left:50%;bottom:150px;transform:translate(-50%,8px);z-index:20;padding:9px 16px;border-radius:10px;font-size:13px;background:var(--panel-solid);color:var(--ink);border:1px solid var(--accent);box-shadow:0 8px 28px rgba(0,0,0,.35);opacity:0;pointer-events:none;transition:opacity .2s, transform .2s;white-space:nowrap}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+@keyframes nudge{0%,100%{box-shadow:0 0 0 0 rgba(232,90,60,0)}30%{box-shadow:0 0 0 6px rgba(232,90,60,.55)}}
+#bRadio.nudge{animation:nudge .5s ease 2}
+
+/* info panel */
+#info{position:fixed;right:16px;top:62px;width:330px;max-height:calc(100% - 200px);z-index:4;overflow:auto;padding:16px 16px 14px}
+#info .x{position:absolute;right:10px;top:10px;border:0;background:none;cursor:pointer;color:var(--muted);font-size:18px;line-height:1;padding:4px}
+#info h2{margin:0 26px 6px 0;font-size:18px}
+.badges{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.badge{font-size:11px;padding:2px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.badge.des{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--ink)}
+.badge.st{color:#fff;border-color:transparent}
+#info .spec{font-size:12.5px;color:var(--muted);margin:0 0 10px;padding:8px 10px;border-radius:10px;background:var(--accent-soft)}
+#info .desc{font-size:13.5px;line-height:1.7;margin:0}
+#info .desc b{color:var(--accent)}
+#info .rel{margin-top:12px;display:flex;flex-wrap:wrap;gap:6px}
+#info .rel button{border:1px solid var(--line);background:transparent;border-radius:8px;padding:3px 8px;font-size:12px;cursor:pointer}
+#info .rel button:hover{border-color:var(--accent);color:var(--accent)}
+#info .sec{font-size:11px;color:var(--faint);margin:14px 0 6px;letter-spacing:.5px}
+
+/* flow caption */
+#flow{position:fixed;left:50%;transform:translateX(-50%);top:14px;width:min(560px,calc(100% - 420px));z-index:5;padding:12px 16px}
+#flow .fh{display:flex;align-items:center;gap:10px}
+#flow .n{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+#flow h3{margin:0;font-size:15px;flex:1}
+#flow .ctl{display:flex;gap:4px}
+#flow .ctl button{border:1px solid var(--line);background:transparent;border-radius:8px;width:30px;height:28px;cursor:pointer}
+#flow .ctl button:hover{border-color:var(--accent);color:var(--accent)}
+#flow p{margin:8px 0 0;font-size:13px;line-height:1.65}
+#flow .freq{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+#flow .freq span{font-size:12px;padding:3px 9px;border-radius:8px;background:var(--accent-soft);font-variant-numeric:tabular-nums}
+#flow .freq b{font-weight:700}
+
+/* stage chips */
+#stages{position:fixed;left:50%;transform:translateX(-50%);bottom:76px;z-index:4;display:flex;gap:4px;align-items:center;padding:6px;max-width:calc(100% - 32px);overflow-x:auto;scrollbar-width:none}
+#stages::-webkit-scrollbar{display:none}
+.chip{flex:none;border:0;border-radius:9px;padding:6px 10px;font-size:12px;cursor:pointer;background:transparent;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.chip i{width:7px;height:7px;border-radius:50%}
+.chip:hover{background:var(--accent-soft)}
+.chip.on{background:var(--ink);color:var(--panel-solid)}
+.arrow{color:var(--faint);font-size:11px;flex:none}
+
+/* bottom bar */
+#bar{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;z-index:5;display:flex;align-items:center;gap:6px;padding:6px 8px;max-width:calc(100% - 32px);overflow-x:auto;scrollbar-width:none}
+#bar::-webkit-scrollbar{display:none}
+.btn{flex:none;border:0;background:transparent;border-radius:9px;padding:8px 12px;font-size:13px;cursor:pointer;white-space:nowrap}
+.btn:hover{background:var(--accent-soft)}
+.btn.on{background:var(--accent);color:#fff}
+.btn.primary{background:var(--ink);color:var(--panel-solid);font-weight:600}
+.sep{width:1px;height:22px;background:var(--line);flex:none;margin:0 2px}
+.sl{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);flex:none;padding:0 4px}
+.sl output{font-variant-numeric:tabular-nums;color:var(--ink);min-width:62px;font-size:12px}
+input[type=range]{-webkit-appearance:none;appearance:none;width:120px;height:4px;border-radius:4px;background:var(--line);outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--accent);border:2px solid var(--panel-solid);box-shadow:0 1px 4px rgba(0,0,0,.25);cursor:pointer}
+input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--accent);border:2px solid var(--panel-solid);cursor:pointer}
+.sw{flex:none;width:20px;height:20px;border-radius:50%;border:2px solid var(--panel-solid);box-shadow:0 0 0 1px var(--line);cursor:pointer;padding:0}
+.sw.on{box-shadow:0 0 0 2px var(--accent)}
+
+/* labels & tooltip */
+#labels{position:fixed;inset:0;pointer-events:none;z-index:3}
+.lb{position:absolute;left:0;top:0;transform:translate(-6px,-50%);pointer-events:auto;cursor:pointer;display:flex;align-items:center;gap:6px;font-size:11.5px;padding:3px 8px 3px 6px;border-radius:999px;background:var(--panel);border:1px solid var(--line);box-shadow:0 2px 8px rgba(0,0,0,.08);white-space:nowrap;transition:opacity .25s}
+.lb i{width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.lb:hover{border-color:var(--accent)}
+#knobHint{position:fixed;z-index:4;pointer-events:none;transform:translate(-50%,-130%);background:var(--accent);color:#fff;font-size:12px;font-weight:600;padding:5px 10px;border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,.2);white-space:nowrap;transition:opacity .3s;animation:kh 1.6s ease-in-out infinite}
+#knobHint::after{content:'';position:absolute;left:50%;bottom:-5px;margin-left:-5px;border:5px solid transparent;border-bottom:0;border-top-color:var(--accent)}
+@keyframes kh{50%{transform:translate(-50%,-150%)}}
+#tip{position:fixed;z-index:8;pointer-events:none;padding:5px 9px;border-radius:8px;font-size:12px;background:var(--ink);color:var(--panel-solid);white-space:nowrap;transform:translate(12px,12px);opacity:0;transition:opacity .12s}
+#tip.show{opacity:1}
+#tip small{opacity:.7;margin-left:6px;font-family:ui-monospace,Menlo,monospace}
+#hint{position:fixed;right:16px;bottom:22px;z-index:3;font-size:11px;color:var(--faint);text-align:right;line-height:1.6;pointer-events:none}
+#loading{position:fixed;inset:0;display:grid;place-items:center;z-index:20;background:var(--bg);font-size:13px;color:var(--muted);transition:opacity .5s}
+#note{position:fixed;left:16px;bottom:22px;z-index:3;font-size:10.5px;color:var(--faint);max-width:250px;line-height:1.5;pointer-events:none}
+
+@media (max-width: 1100px){
+  #flow{width:min(520px,calc(100% - 32px));top:64px}
+  #hint,#note{display:none}
+}
+@media (max-width: 760px){
+  #top p{display:none}
+  #partsToggle{display:block;position:fixed;left:16px;top:62px;z-index:5;padding:7px 12px;border-radius:10px;font-size:12px;cursor:pointer}
+  #parts{top:104px;bottom:auto;max-height:46%;width:calc(100% - 32px)}
+  #parts.collapsed{display:none}
+  #info{left:16px;right:16px;width:auto;top:auto;bottom:132px;max-height:42%}
+  #flow{top:104px}
+  input[type=range]{width:90px}
+}
+
+
+@font-face{font-family:"DSEG7";src:url(data:font/ttf;base64,AAEAAAAMAIAAAwBAT1MvMlt/aV8AAAeoAAAAYGNtYXAARADGAAAICAAAAERjdnQgACECeQAACEwAAAAEZ2FzcP//AAMAAApcAAAACGdseWbuMVS5AAAAzAAABfxoZWFkDGRjBAAABwwAAAA2aGhlYQbVA5IAAAeEAAAAJGhtdHgpPQWbAAAHRAAAAEBsb2NhCfkIOQAABugAAAAibWF4cABZAF8AAAbIAAAAIG5hbWUmRT+OAAAIUAAAAexwb3N0/4EAMgAACjwAAAAgAAEArwG2AoACMgAFAAABFwchJzcCRzlD/qs5RAIyPz0+PgAB/5YAAAASAHwADwAANhQOAiIuAjQ+AjIeARIKEBgYGBAKChAYGBgQShgYEAoKEBgYGBAKChAAAAYAPgAAAvID6AAGAA0AEwAaACEAJwAAEwcjEzcXCwEnEzMfAQsBNyEXByEBNzMDBycbARcDIy8BGwEHISc3IaIFOSQiVBmLHCQ6BDgZBiIB0R1l/qoBfwU6JCJUGYscJDoEOBkGIv4vHWUBVgIDBQGeH13+4v3tHwGeBT3+4gM/Hx9d/nkE/mMfXQEeAhMf/mIEPQEf/MEfH10AAAICMgAtAvIDuwAGAA0AAAE3MwMHJxsBFwMjLwETAo0FOiQiVBmLHCQ6BDgZAeUE/mMfXQEeAhMf/mIEPQEfAAAFAD4AAALyA+gABQAMABIAGQAfAAABFwchJzcDJxMzHwELATchFwchJRcDIy8BGwEHISc3IQJHOUP+qzlEmRwkOgQ4GQYiAdEdZf6qAcgcJDoEOBkGIv4vHWUBVgIyPz0+Pv37HwGeBT3+4gM/Hx9dTx/+YgQ9AR/8wR8fXQAFAGcAAALyA+gABQALABIAGQAfAAABFwchJzcDNyEXByEBNzMDBycbARcDIy8BGwEHISc3IQJHOUP+qzlEOiIB0R1l/qoBfwU6JCJUGYscJDoEOBkGIv4vHWUBVgIyPz0+PgGXHx9d/nkE/mMfXQEeAhMf/mIEPQEf/MEfH10AAAQAZAAtAvIDuwAFAAwAEwAaAAABFwchJzcPASMTNxcDBTczAwcnGwEXAyMvARMCRzlD/qs5RFEFOSQiVBkBqAU6JCJUGYscJDoEOBkCMj89Pj4vBQGeH13+4lsE/mMfXQEeAhMf/mIEPQEfAAUAZAAAAswD6AAFAAwAEgAZAB8AAAEXByEnNw8BIxM3FwsBNyEXByEBNzMDBycbAQchJzchAkc5Q/6rOURRBTkkIlQZLCIB0R1l/qoBfwU6JCJUGSwi/i8dZQFWAjI/PT4+LwUBnh9d/uIBiR8fXf55BP5jH10BHv53Hx9dAAYAPgAAAswD6AAFAAwAEwAZACAAJgAAARcHISc3DwEjEzcXCwEnEzMfAQsBNyEXByEBNzMDBycbAQchJzchAkc5Q/6rOURRBTkkIlQZixwkOgQ4GQYiAdEdZf6qAX8FOiQiVBksIv4vHWUBVgIyPz0+Pi8FAZ4fXf7i/e0fAZ4FPf7iAz8fH13+eQT+Yx9dAR7+dx8fXQAABABkAC0C8gPoAAYADAATABoAABMHIxM3FwsBNyEXByEBNzMDBycbARcDIy8BE6IFOSQiVBksIgHRHWX+qgF/BTokIlQZixwkOgQ4GQIDBQGeH13+4gGJHx9d/nkE/mMfXQEeAhMf/mIEPQEfAAAHAD4AAALyA+gABQAMABMAGQAgACcALQAAARcHISc3DwEjEzcXCwEnEzMfAQsBNyEXByEBNzMDBycbARcDIy8BGwEHISc3IQJHOUP+qzlEUQU5JCJUGYscJDoEOBkGIgHRHWX+qgF/BTokIlQZixwkOgQ4GQYi/i8dZQFWAjI/PT4+LwUBnh9d/uL97R8BngU9/uIDPx8fXf55BP5jH10BHgITH/5iBD0BH/zBHx9dAAYAZAAAAvID6AAFAAwAEgAZACAAJgAAARcHISc3DwEjEzcXCwE3IRcHIQE3MwMHJxsBFwMjLwEbAQchJzchAkc5Q/6rOURRBTkkIlQZLCIB0R1l/qoBfwU6JCJUGYscJDoEOBkGIv4vHWUBVgIyPz0+Pi8FAZ4fXf7iAYkfH13+eQT+Yx9dAR4CEx/+YgQ9AR/8wR8fXQAAAwAUANsAtALyAAAAFgAsAAATNhQOAiIuAjQ3Njc2NzYyFxYXFhcCFA4CIi4CNDc2NzY3NjIXFhcWF2RQChAYGBgQCgUFCAoKCR4JCgoIBR8KEBgYGBAKBQUICgoJHgkKCggFAebbGBgQCgoQGBgMCwgJBQQEBQkIC/5YGBgQCgoQGBgMCwgKBAQEBAoICwAAAQAAABAALgAHAAAAAAACAAAAAQABAAAAQAAuAAAAAAAAAAAAAAAAABEALQB7AJsA2gEaAVABjwHbAhICagK2Av4AAAABAAAAAHXCbXd27V8PPPUACwPoAAAAANAoxZ4AAAAA2pLi1/+WAAAC8gPoAAMACAACAAAAAAAAAWwAIQDIAAADMAAAAzAArwAA/5YDMAA+AzACMgMwAD4DMABnAzAAZAMwAGQDMAA+AzAAZAMwAD4DMABkAMgAFAABAAAD6AAAAFoDMP+W/+4C8gBkAAkAAAAAAAAAAAAAAAAAEAAEAx0CvAAFAAgCigK8AAwAjAKKArz/1wHgADEBAgAAAgAIAwAAAAAAAAAAAAEAAAAAAAAAAAAAAABQZkVkAKEAIAA6A+gAAABaA+gAAAAAAAEAAAAAA+gD6AAAACAAAQAAAAIAAAADAAAAFAADAAEAAAAUAAQAMAAAAAgACAACAAAAIQAuADr//wAAACAALQAw////4f/W/9UAAQAAAAAAAAAAACECeQAAAAcAWgADAAEECQAAAIAAAAADAAEECQABABoAgAADAAEECQACABYAmgADAAEECQADAGoAsAADAAEECQAEADIBGgADAAEECQAFABgBTAADAAEECQAGAC4BZABDAHIAZQBhAHQAZQBkACAAYgB5ACAASwBlAHMAaABpAGsAYQBuAAoAdwBpAHQAaAAgAEYAbwBuAHQARgBvAHIAZwBlACAAMgAuADAAIAAoAGgAdAB0AHAAOgAvAC8AZgBvAG4AdABmAG8AcgBnAGUALgBzAGYALgBuAGUAdAApAEQAUwBFAEcANwAgAEMAbABhAHMAcwBpAGMAQgBvAGwAZAAgAEkAdABhAGwAaQBjAEYAbwBuAHQARgBvAHIAZwBlACAAMgAuADAAIAA6ACAARABTAEUARwA3ACAAQwBsAGEAcwBzAGkAYwAgAEIAbwBsAGQAIABJAHQAYQBsAGkAYwAgADoAIAAxADUALQAzAC0AMgAwADIAMABEAFMARQBHADcAIABDAGwAYQBzAHMAaQBjACAAQgBvAGwAZAAgAEkAdABhAGwAaQBjAFYAZQByAHMAaQBvAG4AIAAwAC4ANAA2AEQAUwBFAEcANwBDAGwAYQBzAHMAaQBjAC0AQgBvAGwAZABJAHQAYQBsAGkAYwADAAD/+wAA/4MAMgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAf//AAI=) format("truetype");}
+@font-face{font-family:"MaoCao";src:url(data:font/ttf;base64,AAEAAAANAIAAAwBQR1NVQgABAAAAAAoQAAAACk9TLzKlsNz4AAAHNAAAAGBjbWFwZc3NKAAAB5QAAABEZ2FzcAAAABAAAAoIAAAACGdseWaHTEoaAAAA3AAABcJoZWFkDDuhUgAABswAAAA2aGhlYQf3A7sAAAcQAAAAJGhtdHgGdwEsAAAHBAAAAAxsb2NhBBUB9wAABsAAAAAKbWF4cACJAsAAAAagAAAAIG5hbWUro0SMAAAH4AAAAghwb3N0/7gAMgAACegAAAAgcHJlcGgGjIUAAAfYAAAABwAGAOT/ZAMYAzwAnQCtAMEAzQDSANwAAAE0FhYXFhUUFhcWFhcWBgcHFQcGFjMyFxYXFgYVBgYHBgYHBxUGFhcWFxYXFhcWFQYjMCMwNTYnJiYnJgYVFgcGBiMiJyYnNDYXMjY1NDY1JicjBwYHBicwJjU1NzY3NjY3Njc2NjUuAiMmJjU0Njc2NzYzNDYnIg4DFQYXFiMiJyYmJyYmNzY2NzY2NAYGIicmJjQzMjc+AwM1IyYHBgYHBhUUNzY3NjYXJgYHBhUVFxYzMjY3PgI0NzQ0BwYHFB4CNzI2NCYHMjQiFBc0IzAHBhUyNjYB5AgECAwMCBAIBAQIGBgEBAQUICAcCAgICDwMEBAECAgMFDwwOCQgFAwEDAQIGBiESBgIDAQIDAQMFBgMCAQIBAgIJAggKCQgCBAUFAwUTBAECBQMBCQQBAQQEAgYKAwIBAQILCAoBAQUFAwEDAwkBAQEBAgUDBB8HChECAgUCBhAKCwEBBAEDBQYJAwQGCQsEAR0EDgEBAwMCAwEBAgEEASULAQIDBwEBBAIUAQESAQUEAQcCAM4BAQEBBgoCAgECAQMDBgYEBwsGAQMDBAMJAwYWBQMKBAQOCwIBAQUEBwQJBgkQBQ0ICBACAQIRHAQCBAYGBgEBAQICBR4BAQIHCwcFAwYEAwECBAQSBgICCAMCAQQHAQcCAQYBBQMBAQ4CBQcDAQkPCwgDAgwIBA8CCgcHBCEBBQMBAQUBCAUFARU/vwkBBAUKAwgDAwQGBAIBCQEBAgEJCwEDAQMDAgkDAQEEIgQBAQQDAQEFCAELAQEtAwMFAgIBAAAAgDY/4wDKAMUABIAhgAAJTIWFxYHBgYHBicmNzY3NzY1NAM2FhceAxUUBwYUNzYXFhcWBiMmBwYHBgYHBgcHFDI3NhcWFxYUFQcGBwYGIyYmJyYnJiY1NDMyFxY2NzY3NjY0JyYnJgYGMSIHBiciJyY1NjY3NCYHBiMGIicmJicwJjUwFxYXMjc2NzQ2NzYmJyYnJgIcBBwEBBQEOBQsDAgICAgcSGgENAgUIAgQEAQkeCgcEAwIFDwULCw0FAQQFAgIFEg8KAgIDBwgFBAQGBQIHAQEEAQIMBQgCBgQBAgIDCgMJAgMKAQMEAwEBBgEBBQMDBhMFBQoBBQUFBwoNGQEFAQMDBQIJBDYEAQMLBhEDBgEBAwEDCRkEAwCPAQEDAQkFDwUJEggBAgcCAgUEAQEBAgMEBAIHEgkCAgUNBgsEEAQKFwoEAQEDBAQCAQUCAQQDAwUKDQUHEAIIAgEDAgYCAgoFAQIXCAIBAQEEAQIDAwkBAwEBAgUCAR4MDAsGAwEBAAAAgBI/6ADuAL0AJgApgAAATYzMhYWBgcOAxQWFxc3NjY3Njc3NjMyFhcWFRQHDgIUMxY3NjIXFhUUBwYHBgcGJzA3NjUmIwYnJiYnJjY3Njc2JyIHBgcHBgYHBgcGFTAXFhcWFAYHBgYHBjEGJyImJyY0JyYmNTQ3Njc2MTQnJicmJjU1NzY3NicmByIGFTAHBgYVMAcGIyYmIyImJzQ0NhcWMjc2EyYjIgcGBhcWFjMyNzYBYCAUHBAEBAgEVCAMLAwUEBAYECQgMIhIEAwcEEQIDAwIBCA0GBw0DCQcGBwwDBAoBAxAHBAQCBgMKEQQDAwEHCQQKAw8ECQsWAgoFAwUCAggDAgMGAwQGBwMFAQgFCQMLBQMDAwUFAyMFAQYCCwQFDQQHCQcGAgMEAgMBAgYOGhcCAQMHBQICAgoEBQMCALsCAgYOBQUnFggBAwIDAwMEAwYGBxQBBAQFCR0ECAQCAgMBAgQEAQIGAwEHCwEEDQEDAwMBAQMJEA0TCQQCAgEBAgEIAQMJDgMCCxEHGhEDAgkCAQMDAwUJAwIHAwQNEQ0IBQMCAgQDBAYFCQoEOAQCAgcBBQQSAQQHAwILBAMEAwQBBww/iQUOCBgHBAgXFQAAAABAAAABAITABEAjQAFAAEAAgAeAAYAAABkAAAAAgABAAAAAAE0AfcC4QAAAAEAAAABAMT7gzUMXw889QADA+gAAAAAyxtlMwAAAADdhPlm/6v9mQTZA3gAAAAHAAIAAAAAAAABnwAABAAA5ADYAEgAAQAAA3D/iAAABOz/q/9EBNkAAQAAAAAAAAAAAAAAAAAAAAIABAPzAZAABQAAAooCWAAAAEsCigJYAAABXgAyAPwAAAAABQAAAAAAAAAAAAAACAAAAAAAAAAAAAAAQkRGWgDAThx+ogNw/4gAAAPoAmcAAAABAAAAAAGkAlgAAAAgAAAAAAACAAAAAwAAABQAAwABAAAAFAAEADAAAAAIAAgAAgAAThxluX6i//8AAE4cZbl+ov//seWaSYFhAAEAAAAAAAAAALgB/4WwBI0AAAAABwBaAAMAAQQJAAAAzAAAAAMAAQQJAAEAIADMAAMAAQQJAAIADgDsAAMAAQQJAAMAQAD6AAMAAQQJAAQAMAE6AAMAAQQJAAUAGgFqAAMAAQQJAAYAKgGEAEMAbwBwAHkAcgBpAGcAaAB0ACAAMgAwADEAOAAgAFQAaABlACAATABpAHUAIABKAGkAYQBuACAATQBhAG8AIABDAGEAbwAgAFAAcgBvAGoAZQBjAHQAIABBAHUAdABoAG8AcgBzACAAKABoAHQAdABwAHMAOgAvAC8AdwB3AHcALgBnAGkAdABoAHUAYgAuAGMAbwBtAC8AZwBvAG8AZwBsAGUAZgBvAG4AdABzAC8AbABpAHUAagBpAGEAbgBtAGEAbwBjAGEAbwApAEwAaQB1ACAASgBpAGEAbgAgAE0AYQBvACAAQwBhAG8AUgBlAGcAdQBsAGEAcgAxAC4AMAAwADMAOwBCAEQARgBaADsATABpAHUASgBpAGEAbgBNAGEAbwBDAGEAbwAtAFIAZQBnAHUAbABhAHIATABpAHUAIABKAGkAYQBuACAATQBhAG8AIABDAGEAbwAgAFIAZQBnAHUAbABhAHIAVgBlAHIAcwBpAG8AbgAgADEALgAwADAAMwBMAGkAdQBKAGkAYQBuAE0AYQBvAEMAYQBvAC0AUgBlAGcAdQBsAGEAcgADAAAAAAAA/7UAMgAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAf//AA8AAQAAAAAAAAAAAAA=) format("truetype");}
+#colorPick{position:fixed;right:62px;top:14px;z-index:6;height:36px;border-radius:10px;display:flex;align-items:center;gap:8px;padding:0 10px 0 12px;font-size:12px;color:var(--muted)}
+#colorPick .sws{display:flex;gap:6px}
+#colorPick .sw{width:22px;height:22px}
+#colorPick .sw span{display:none}
+.btn .pw{vertical-align:-3px;margin-right:5px}
+#bRadio.on{background:#2f8f55;color:#fff}
+.lcdwrap{border-radius:12px;padding:5px;background:linear-gradient(#1a1917,#0e0d0c);box-shadow:inset 0 1px 0 rgba(255,255,255,.06), 0 2px 8px rgba(0,0,0,.4)}
+#lcd{display:block;width:100%;height:auto;border-radius:8px}
+/* radio panel */
+#rTab{position:fixed;right:0;top:50%;transform:translateY(-50%);z-index:6;border-radius:12px 0 0 12px;border-right:0;padding:12px 8px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;width:46px;color:var(--ink)}
+#rTab .ic{font-size:18px}
+#rTab b{font-family:ui-monospace,Menlo,monospace;font-size:13px;writing-mode:vertical-rl;letter-spacing:1px;color:#f5b43a;text-shadow:0 0 8px rgba(245,170,50,.35)}
+#rTab small{font-size:11px;writing-mode:vertical-rl;color:var(--muted);max-height:120px;overflow:hidden}
+#rTab .ar{font-size:12px;color:var(--faint)}
+#rTab:hover{border-color:var(--accent)}
+#rFold{width:28px;padding:4px 0!important}
+#radio{transition:transform .28s ease, opacity .28s}
+#radio{position:fixed;right:16px;bottom:132px;width:330px;z-index:6;padding:14px 14px 12px;max-height:calc(100% - 200px);overflow:auto}
+#radio .rh{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+#radio .rh b{font-size:14px;flex:1}
+#radio .rh button{border:1px solid var(--line);background:transparent;border-radius:8px;padding:4px 10px;font-size:12px;cursor:pointer}
+#radio #rPower.on{background:var(--accent);border-color:var(--accent);color:#fff}
+#rClose{width:28px;padding:4px 0!important}
+.lcd{border-radius:12px;padding:12px 14px;background:#0d100c;color:#b8f5a0;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;box-shadow:inset 0 2px 10px rgba(0,0,0,.6)}
+#radio.off .lcd{color:#3c4a38}
+.lcd .row{display:flex;align-items:flex-end;gap:10px}
+#rFreq{font-size:40px;font-weight:700;line-height:1;letter-spacing:1px;font-variant-numeric:tabular-nums;text-shadow:0 0 12px rgba(150,255,120,.35)}
+.lcd .u{font-size:12px;opacity:.75;margin-bottom:4px}
+#rBars{margin-left:auto;display:flex;gap:3px;align-items:flex-end;height:26px}
+#rBars i{width:5px;background:rgba(184,245,160,.18);border-radius:1px}
+#rBars i:nth-child(1){height:6px}#rBars i:nth-child(2){height:10px}#rBars i:nth-child(3){height:15px}#rBars i:nth-child(4){height:20px}#rBars i:nth-child(5){height:26px}
+#rBars i.on{background:#b8f5a0;box-shadow:0 0 6px rgba(150,255,120,.6)}
+#rName{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;font-size:17px;font-weight:700;margin-top:8px;min-height:22px}
+#rArea{font-size:11px;opacity:.7;margin-top:2px}
+#rMsg{font-size:12px;color:var(--muted);margin:8px 2px 0;min-height:17px}
+.rvol{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);margin:10px 2px 4px}
+.rvol input{flex:1;width:auto}
+#rList{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;max-height:168px;overflow:auto;padding-right:2px;scrollbar-width:thin}
+
+.stn{border:1px solid var(--line);background:transparent;border-radius:9px;padding:4px 9px;font-size:12px;cursor:pointer;display:flex;gap:6px;align-items:baseline}
+.stn b{font-family:ui-monospace,Menlo,monospace;font-size:11.5px;color:var(--accent)}
+.stn.on{background:var(--ink);color:var(--panel-solid)}
+.stn.on b{color:inherit}
+#radio details{margin-top:10px;font-size:12px}
+#radio summary{cursor:pointer;color:var(--muted)}
+#rEdit{width:100%;border-collapse:collapse;margin-top:6px}
+#rEdit td{padding:2px}
+#rEdit input{width:100%;font:inherit;font-size:11.5px;padding:4px 5px;border:1px solid var(--line);border-radius:6px;background:transparent;color:var(--ink)}
+#rEdit td:first-child{width:62px}#rEdit td:nth-child(2){width:84px}#rEdit td:last-child{width:22px}
+#rEdit .del{border:0;background:none;color:var(--muted);cursor:pointer}
+.racts{display:flex;gap:6px;margin-top:6px}
+.racts button{border:1px solid var(--line);background:transparent;border-radius:7px;padding:3px 9px;font-size:12px;cursor:pointer}
+.rnote{font-size:10.5px;color:var(--faint);margin-top:8px;line-height:1.5}
+@media (max-width: 760px){ #pTab,#pHide{display:none} }
+@media (max-width: 520px){ #colorPick>span{display:none} #top h1{font-size:15px;max-width:calc(100vw - 230px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis} }
+/* ---- Android app (fullscreen WebView) ---- */
+html.app #stages{display:none}
+html.app #top{top:calc(12px + env(safe-area-inset-top));left:calc(14px + env(safe-area-inset-left))}
+html.app #colorPick,html.app #themeBtn{top:calc(12px + env(safe-area-inset-top))}
+html.app #bar{bottom:calc(10px + env(safe-area-inset-bottom))}
+html.app #radio{bottom:calc(72px + env(safe-area-inset-bottom))}
+@media (max-width: 760px){ html.app #radio{max-height:40%} html.app #info{bottom:calc(72px + env(safe-area-inset-bottom))} }
+@media (min-width: 761px) and (max-height: 520px){
+  html.app #top p{display:none}
+  html.app #radio{top:62px;bottom:calc(70px + env(safe-area-inset-bottom));max-height:none;width:340px}
+  html.app #parts{top:62px;bottom:calc(70px + env(safe-area-inset-bottom))}
+  html.app #info{top:62px;bottom:calc(70px + env(safe-area-inset-bottom));max-height:none;overflow:auto}
+}
+@media (max-width: 760px){ #radio{left:16px;right:16px;width:auto;bottom:132px;max-height:52%} }
+</style>
+</head>
+<body>
+<div id="loading">正在构建三维模型…</div>
+<canvas id="c" tabindex="0" aria-label="德生2P3收音机三维模型"></canvas>
+<div id="labels"></div>
+<div id="tip"></div>
+<div id="knobHint" style="opacity:0">⟲ 按住这里拖动调台</div>
+
+<header id="top">
+  <div class="mark">2P3</div>
+  <div><h1>德生 2P3 中波超外差收音机</h1><p>3D 分解结构图 · 点击任一零件查看功能</p></div>
+</header>
+<div id="colorPick" class="panel"><span>机身颜色</span><div class="sws"></div></div>
+<button id="themeBtn" class="panel" title="切换深浅色" aria-label="切换深浅色">◐</button>
+
+<button id="partsToggle" class="panel">零件清单 ▾</button>
+<aside id="parts" class="panel collapsed-mobile">
+  <div class="ph"><b>零件清单</b><span class="phr"><span id="count"></span><button id="pHide" title="向左隐藏零件清单" aria-label="隐藏零件清单">⇤</button></span></div>
+  <div id="partsList"></div>
+</aside>
+
+<button id="pTab" class="panel" title="展开零件清单" aria-label="展开零件清单"><span class="ar">⇥</span><b>零件清单</b></button>
+<div id="toast" role="status"></div>
+<aside id="info" class="panel hidden" aria-live="polite"></aside>
+
+<section id="flow" class="panel hidden">
+  <div class="fh"><span class="n" id="flowN"></span><h3 id="flowT"></h3>
+    <div class="ctl"><button id="fPrev" title="上一步">‹</button><button id="fPlay" title="播放/暂停">❚❚</button><button id="fNext" title="下一步">›</button><button id="fClose" title="退出">✕</button></div>
+  </div>
+  <p id="flowP"></p>
+  <div class="freq" id="flowF"></div>
+</section>
+
+
+<aside id="radio" class="panel hidden off" aria-live="polite">
+  <div class="rh"><b>中波收音 · MW</b><button id="rFold" title="收起到右侧">⇥</button><button id="rClose" title="收起面板（不关机）">✕</button></div>
+  <div class="lcdwrap"><canvas id="lcd" width="640" height="200" aria-label="频率显示屏"></canvas></div>
+  <div id="rMsg"></div>
+  <div class="rvol">音量<input type="range" id="rVol" min="0" max="100" value="60"></div>
+  <div style="font-size:11px;color:var(--faint);margin:6px 2px 0">按住 3D 模型上的<b>调谐拨盘</b>拖动旋转（滚轮微调，Shift 每次 9 kHz），或点电台：</div>
+  <div id="rList"></div>
+  <details><summary>电台表（可编辑：频率 / 名称 / 直播地址）</summary>
+    <table id="rEdit"><tbody></tbody></table>
+    <div class="racts"><button id="rAdd">＋ 添加（当前频率）</button><button id="rReset">恢复默认</button></div>
+  </details>
+  <div class="rnote">中波频率据公开中波频率表（广播迷网、5BCL 等，湖北全省 + 中央台），部分频率可能已调整；同频台只收录一座，每台配多个直播源（蜻蜓FM / 央广云听 / 武汉广电），连不上会自动换下一个，全部失败时再到 radio-browser.info 公共目录搜索。需联网，仅供学习演示。</div>
+</aside>
+<button id="rTab" class="panel hidden" title="展开收听面板"><span class="ic"><svg class="pw" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M7.05 6.46a7.5 7.5 0 1 0 9.9 0" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M12 3v8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></span><b id="rTabF">1008</b><small id="rTabN">kHz</small><span class="ar">⇤</span></button>
+<nav id="stages" class="panel"></nav>
+
+<footer id="bar" class="panel">
+  <button class="btn primary" id="bExplode">组装</button>
+  <div class="sl">分解<input type="range" id="sExplode" min="0" max="1000" value="0"></div>
+  <div class="sep"></div>
+  <button class="btn" id="bRadio"><svg class="pw" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M7.05 6.46a7.5 7.5 0 1 0 9.9 0" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M12 3v8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg><span>开机</span></button>
+  <button class="btn" id="bFlow">信号流程</button>
+  <button class="btn" id="bXray">外壳透视</button>
+  <button class="btn" id="bLabels">标注</button>
+  <button class="btn" id="bRotate">自动旋转</button>
+  <button class="btn" id="bReset">重置视角</button>
+  <div class="sep"></div>
+  <div class="sl">调谐<input type="range" id="sTune" min="530" max="1620" value="1008"><output id="oTune">1008 kHz</output></div>
+</footer>
+
+<div id="hint">按住收音机拖动：移动位置 · 拖动空白处：旋转视角<br>滚轮/双指缩放 · 点击零件查看功能 · 点空白处取消选择</div>
+<div id="note">外形依据公开资料与实物照片建模；元件位号与参数按典型 2P3 电路整理，个别数值可能因套件批次不同而有差异。</div>
+
+<script src="../../three.min.js"></script>
+<script>
+/* hls.js (only needed for 央广云听 HLS streams in browsers without native HLS) — loaded from public CDNs, integrity-checked */
+(function(){ var U=['https://cdn.bootcdn.net/ajax/libs/hls.js/1.5.20/hls.light.min.js','https://cdn.jsdelivr.net/npm/hls.js@1.5.20/dist/hls.light.min.js','https://unpkg.com/hls.js@1.5.20/dist/hls.light.min.js'], i=0;
+  (function next(){ if(i>=U.length) return; var s=document.createElement('script'); s.src=U[i++]; s.integrity='sha384-GMRZjjumhWPywgLYrubnh5qVhHY0BpD+pxIL57uwAenrOEYDLZ/z+8s/rFIjS+yO'; s.crossOrigin='anonymous'; s.async=true; s.onerror=function(){ s.remove(); next(); }; document.head.appendChild(s); })(); })();
+</script>
+<script>(function(){
+'use strict';
+const V3 = THREE.Vector3, V2 = THREE.Vector2;
+const PI = Math.PI;
+const $ = s => document.querySelector(s);
+const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
+const ease = t => t<.5 ? 4*t*t*t : 1-Math.pow(-2*t+2,3)/2;
+
+/* ---------------- renderer / scene ---------------- */
+const canvas = $('#c');
+const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true, powerPreference:'high-performance'});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 2));
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 0.82;
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.physicallyCorrectLights = false;
+renderer.setClearColor(0x000000, 0);
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(30, 1, 2, 6000);
+const ASM = new THREE.Group();           // whole radio; case coords in mm
+scene.add(ASM);
+
+(function env(){
+  // dim studio with large soft boxes → gentle reflections instead of glare
+  const pm = new THREE.PMREMGenerator(renderer);
+  const es = new THREE.Scene();
+  es.add(new THREE.Mesh(new THREE.BoxGeometry(100,100,100), new THREE.MeshBasicMaterial({color:0x1b1a19, side:THREE.BackSide})));
+  const L = (c,w,h,x,y,z,ry,rx,tint)=>{ const col=new THREE.Color(tint||0xffffff).multiplyScalar(c); const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h), new THREE.MeshBasicMaterial({color:col, side:THREE.DoubleSide})); m.position.set(x,y,z); m.rotation.set(rx||0,ry||0,0); es.add(m); };
+  L(1.6, 70,50, -10,49,10, 0, PI/2, 0xfff1e0);   // big overhead softbox (warm)
+  L(0.9, 40,60, -49,10,20, PI/2, 0, 0xfff4e8);   // key-side strip
+  L(0.55, 30,50, 49,5,-20, -PI/2, 0, 0xdde6ff);  // cool rim strip
+  L(0.25, 80,30, 0,-10,49, PI, 0);               // faint front fill
+  scene.environment = pm.fromScene(es, 0.04).texture;
+})();
+const hemi = new THREE.HemisphereLight(0xd8dff0, 0x2a2420, 0.22); scene.add(hemi);
+const sun = new THREE.DirectionalLight(0xffeedd, 1.05); sun.position.set(-150,230,210);
+sun.castShadow = true; sun.shadow.mapSize.set(2048,2048);
+Object.assign(sun.shadow.camera,{left:-230,right:230,top:230,bottom:-230,near:10,far:900}); sun.shadow.bias=-0.0004; sun.shadow.normalBias=0.6; sun.shadow.radius=6;
+scene.add(sun); scene.add(sun.target);
+const rim = new THREE.DirectionalLight(0xcfdcff, 0.75); rim.position.set(240,110,-260); scene.add(rim);
+const kick = new THREE.DirectionalLight(0xffd9c0, 0.28); kick.position.set(260,-40,160); scene.add(kick);
+// soft ground: shadow catcher + warm pool of light
+const GROUND_Y = -46;
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(1600,1600), new THREE.ShadowMaterial({opacity:.42}));
+ground.rotation.x=-PI/2; ground.position.y=GROUND_Y; ground.receiveShadow=true; scene.add(ground);
+const poolTex=(()=>{ const c=document.createElement('canvas'); c.width=c.height=512; const g=c.getContext('2d'); const gr=g.createRadialGradient(256,256,0,256,256,256); gr.addColorStop(0,'rgba(255,236,210,.10)'); gr.addColorStop(.5,'rgba(255,236,210,.04)'); gr.addColorStop(1,'rgba(255,236,210,0)'); g.fillStyle=gr; g.fillRect(0,0,512,512); const t=new THREE.CanvasTexture(c); return t; })();
+const pool = new THREE.Mesh(new THREE.PlaneGeometry(700,700), new THREE.MeshBasicMaterial({map:poolTex, transparent:true, depthWrite:false}));
+pool.rotation.x=-PI/2; pool.position.y=GROUND_Y+0.05; scene.add(pool);
+window.__applySceneTheme = (light)=>{ renderer.toneMappingExposure = light? 0.9 : 0.82; ground.material.opacity = light? .28 : .42; pool.visible=!light; hemi.intensity = light? .3 : .22; };
+
+/* ---------------- materials ---------------- */
+const std = (color, o={}) => new THREE.MeshStandardMaterial(Object.assign({color, roughness:.5, metalness:0}, o));
+const MAT = {
+  chrome: std(0xe6e8ea,{metalness:1, roughness:.12}),
+  steel:  std(0xb9bdc2,{metalness:1, roughness:.34}),
+  tin:    std(0xdfe2e4,{metalness:1, roughness:.2}),
+  nickel: std(0xc9ccd0,{metalness:1, roughness:.28}),
+  brass:  std(0xc9a24a,{metalness:1, roughness:.3}),
+  copper: std(0xc57a3c,{metalness:1, roughness:.32}),
+  enamel: std(0xa8521f,{metalness:.85, roughness:.3}),
+  lead:   std(0xc3c7cb,{metalness:1, roughness:.3}),
+  black:  std(0x1b1b1d,{roughness:.55}),
+  blackGloss: std(0x141416,{roughness:.28}),
+  darkGrey: std(0x3a3b3f,{roughness:.6}),
+  ferrite: std(0x2a2a2c,{roughness:.75, metalness:.1}),
+  white:  std(0xf2f0ea,{roughness:.45}),
+  ivory:  std(0xe9e1cc,{roughness:.5}),
+  paper:  std(0x3b3a38,{roughness:.95}),
+  oilpaper: std(0xc7964a,{roughness:.7, transparent:true, opacity:.92}),
+  resBody: std(0xd9c49a,{roughness:.55}),
+  resBlue: std(0x5e8fc7,{roughness:.5}),
+  capOrange: std(0xd9772b,{roughness:.55}),
+  capBlue: std(0x3f68b5,{roughness:.5}),
+  capYellow: std(0xe4b12a,{roughness:.5}),
+  polyGreen: std(0x2f6b4a,{roughness:.45}),
+  clear:  std(0xdfeaf2,{roughness:.08, transparent:true, opacity:.28, depthWrite:false}),
+  glassRed: std(0xd2451e,{roughness:.1, transparent:true, opacity:.85}),
+  glassClr: std(0xe8efe8,{roughness:.1, transparent:true, opacity:.55}),
+  rubber: std(0x222224,{roughness:.9}),
+  redWire: std(0xd02a24,{roughness:.45}),
+  blackWire: std(0x202022,{roughness:.45}),
+  pcbEdge: std(0x1d5a33,{roughness:.6}),
+  vcBody: std(0xeef2f4,{roughness:.2, transparent:true, opacity:.38, depthWrite:false}),
+  vcBase: std(0xf1efe8,{roughness:.5}),
+  foam:   std(0x2c2c2e,{roughness:1}),
+};
+const CASE_COLORS = [
+  {name:'红色', c:'#5e0710', ui:'#b3131d'},
+  {name:'绿色', c:'#03453a', ui:'#0f8a72'},
+  {name:'蓝色', c:'#0a3a78', ui:'#1c6fc9'},
+  {name:'黑色', c:'#141416', ui:'#1c1c1f'},
+];
+let caseColor = CASE_COLORS[0];
+MAT.case = std(caseColor.c,{roughness:.5, envMapIntensity:.2}); MAT.case.userData.isCase = true;
+MAT.caseInner = std(caseColor.c,{roughness:.7, envMapIntensity:.5}); MAT.caseInner.userData.isCase = true;
+MAT.shell = std(0xe6e1d6,{roughness:.48, envMapIntensity:.45});
+MAT.shellInner = std(0xe9e6de,{roughness:.7, envMapIntensity:.4});
+MAT.badge = std(0xc4231c,{roughness:.45});
+
+/* ---------------- geometry helpers ---------------- */
+function mesh(geo, mat, x=0,y=0,z=0){ const m=new THREE.Mesh(geo,mat); m.position.set(x,y,z); return m; }
+function box(w,h,d,mat,x=0,y=0,z=0){ return mesh(new THREE.BoxGeometry(w,h,d),mat,x,y,z); }
+function cylZ(r,h,mat,x=0,y=0,z=0,seg=28,rb){ const g=new THREE.CylinderGeometry(r, rb===undefined?r:rb, h, seg); g.rotateX(PI/2); return mesh(g,mat,x,y,z); }
+function cylX(r,h,mat,x=0,y=0,z=0,seg=24){ const g=new THREE.CylinderGeometry(r,r,h,seg); g.rotateZ(PI/2); return mesh(g,mat,x,y,z); }
+function cylY(r,h,mat,x=0,y=0,z=0,seg=24){ return mesh(new THREE.CylinderGeometry(r,r,h,seg),mat,x,y,z); }
+function sph(r,mat,x=0,y=0,z=0,sx=1,sy=1,sz=1){ const m=mesh(new THREE.SphereGeometry(r,16,12),mat,x,y,z); m.scale.set(sx,sy,sz); return m; }
+function rrectPts(w,h,r,cx=0,cy=0,seg=6){
+  const pts=[], cs=[[cx+w/2-r,cy-h/2+r,-PI/2],[cx+w/2-r,cy+h/2-r,0],[cx-w/2+r,cy+h/2-r,PI/2],[cx-w/2+r,cy-h/2+r,PI]];
+  for(const [x,y,a0] of cs) for(let i=0;i<=seg;i++){ const a=a0+i/seg*PI/2; pts.push(new V2(x+Math.cos(a)*r, y+Math.sin(a)*r)); }
+  return pts;
+}
+function circPts(cx,cy,r,seg=20){ const p=[]; for(let i=0;i<seg;i++){ const a=i/seg*PI*2; p.push(new V2(cx+Math.cos(a)*r, cy+Math.sin(a)*r)); } return p; }
+const shapeOf = pts => new THREE.Shape(pts);
+const holeOf  = pts => new THREE.Path(pts.slice().reverse());
+/* smooth shading on curved surfaces while keeping hard edges crisp (crease-angle normals) */
+function creaseNormals(geo, ang=38){
+  if(geo.index) geo=geo.toNonIndexed();
+  const pos=geo.attributes.position, n=pos.count, cs=Math.cos(ang*PI/180);
+  const fN=new Float32Array(n), fx=[], a=new V3(), b=new V3(), c=new V3(), t1=new V3(), t2=new V3();
+  for(let i=0;i<n;i+=3){ a.fromBufferAttribute(pos,i); b.fromBufferAttribute(pos,i+1); c.fromBufferAttribute(pos,i+2); t1.subVectors(c,b); t2.subVectors(a,b); const v=t1.cross(t2); const l=v.length(); fx.push(l>1e-12? v.clone().divideScalar(l) : new V3()); }
+  const key=i=>((pos.getX(i)*500)|0)+'_'+((pos.getY(i)*500)|0)+'_'+((pos.getZ(i)*500)|0);
+  const map=new Map(); const keys=new Array(n);
+  for(let i=0;i<n;i++){ const k=keys[i]=key(i); let L=map.get(k); if(!L) map.set(k,L=[]); L.push(i); }
+  const out=new Float32Array(n*3), acc=new V3();
+  for(let i=0;i<n;i++){ const f=fx[(i/3)|0]; acc.set(0,0,0); for(const j of map.get(keys[i])){ const g=fx[(j/3)|0]; if(f.dot(g)>=cs) acc.add(g); } if(acc.lengthSq()<1e-12) acc.copy(f); acc.normalize(); out[i*3]=acc.x; out[i*3+1]=acc.y; out[i*3+2]=acc.z; }
+  geo.setAttribute('normal', new THREE.BufferAttribute(out,3)); return geo;
+}
+function extrude(shape, depth, mat, z=0){ const g=creaseNormals(new THREE.ExtrudeGeometry(shape,{depth, bevelEnabled:false, curveSegments:32})); return mesh(g,mat,0,0,z); }
+/* plate with softly rounded (beveled) edges; occupies z0 … z0+thick */
+function bevelPlate(shape, thick, mat, z0, b=0.6){
+  const g=creaseNormals(new THREE.ExtrudeGeometry(shape,{depth:Math.max(0.05,thick-2*b), bevelEnabled:true, bevelThickness:b, bevelSize:b, bevelOffset:-b, bevelSegments:6, curveSegments:32}),42);
+  return mesh(g,mat,0,0,z0+b);
+}
+function tube(points, r, mat, seg=40, rs=6){ const c=new THREE.CatmullRomCurve3(points.map(p=>p.isVector3?p:new V3(...p)),false,'catmullrom',0.1); return new THREE.Mesh(new THREE.TubeGeometry(c,seg,r,rs,false),mat); }
+function helix(x0,x1,turns,r,wr,mat){
+  const pts=[]; const n=turns*14;
+  for(let i=0;i<=n;i++){ const t=i/n, a=t*turns*PI*2; pts.push(new V3(x0+(x1-x0)*t, Math.cos(a)*r, Math.sin(a)*r)); }
+  const c=new THREE.CatmullRomCurve3(pts);
+  return new THREE.Mesh(new THREE.TubeGeometry(c,n,wr,5,false),mat);
+}
+/* knurled disc (flat, normal +z) */
+function knurlDisc(r, depth, teeth, toothH, mat, holeR=0){
+  const pts=[]; const n=teeth*2;
+  for(let i=0;i<n;i++){ const a=i/n*PI*2; const rr = (i%2)? r-toothH : r; pts.push(new V2(Math.cos(a)*rr, Math.sin(a)*rr)); }
+  const s=shapeOf(pts); if(holeR>0) s.holes.push(holeOf(circPts(0,0,holeR,48)));
+  return extrude(s, depth, mat);
+}
+
+/* ---------------- canvas textures ---------------- */
+const FONT = '-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC","Segoe UI",sans-serif';
+function canvasTex(w,h,draw,srgb=true){
+  const c=document.createElement('canvas'); c.width=w; c.height=h; const g=c.getContext('2d'); draw(g,w,h);
+  const t=new THREE.CanvasTexture(c); if(srgb) t.encoding=THREE.sRGBEncoding; t.anisotropy=renderer.capabilities.getMaxAnisotropy(); t.userData={canvas:c, draw};
+  return t;
+}
+function decal(w,h,tex,opts={}){
+  const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h), new THREE.MeshStandardMaterial({map:tex, transparent:true, roughness:opts.rough??.5, metalness:0, depthWrite:false, polygonOffset:true, polygonOffsetFactor:-2}));
+  return m;
+}
+function textTex(lines, {w=256,h=128,color='#d8d8d8',bg=null,size=40,weight=600,font=FONT, align='center', lh=1.15}={}){
+  return canvasTex(w,h,(g)=>{
+    if(bg){ g.fillStyle=bg; g.fillRect(0,0,w,h); }
+    g.fillStyle=color; g.textAlign=align; g.textBaseline='middle';
+    const L=Array.isArray(lines)?lines:[lines];
+    const total=L.length*size*lh;
+    L.forEach((ln,i)=>{ const s = typeof ln==='object'? ln.size: size; const t=typeof ln==='object'? ln.t: ln; g.font=`${weight} ${s}px ${font}`; g.fillText(t, align==='center'?w/2:(align==='left'?8:w-8), h/2-total/2+size*lh*(i+.5)); });
+  });
+}
+
+/* ---------------- case constants (mm, front view: x→right, y→up, z→viewer) ---------------- */
+const CW=110, CH=75, ZF=17.5, ZB=-17.5, WT=1.6, CR=5;
+const Z_BODY0=-13, Z_BODY1=12.5, Z_BEZ=14.2, Z_FACE=15.7;
+const PCB = {x0:-52, x1:52, y0:-34, y1:34, back:3.4, front:5.0};
+const SPK = {x:-15, y:2, r:28.5};
+const SPK_HOLE = 12;
+const DIAL = {x:41, y:10, r:17, z:7.6};
+const SLOT_Z0 = DIAL.z-0.4, SLOT_Z1 = DIAL.z+2.6;   // tuning-wheel slot in the right side wall (front band)
+const WIN = {x:41, y:19.7, w:7.4, h:7.4, ow:11, oh:11, d:2.4};
+const VOL = {x:41.5, y:-19.5, z:4.3, r:12.8, t:5.4};
+const SLOT = {x:41.5, y:-19.5, w:6.4, h:23, ow:9.6, oh:26.4, d:2.4};
+const CUT = {x0:37.5, x1:45.5, y0:-33, y1:-6};
+const BATT = {x:-25, y:-19.5, w:56, h:29};
+const CHEV = {top:27, vx:20, vy:0, bot:27};
+const chevX = y => y>=CHEV.vy ? CHEV.vx+(y-CHEV.vy)/(CH/2-CHEV.vy)*(CHEV.top-CHEV.vx) : CHEV.vx+(CHEV.vy-y)/(CHEV.vy+CH/2)*(CHEV.bot-CHEV.vx);
+const ROD = {x:0.5, y:28.5, z:PCB.back-5.4, r:4, L:84};
+const BACK_SCREW = [14.5,-1];
+const PCB_SCREWS = [[49,31],[-49,31],[49,-31]];
+const FMIN=530, FMAX=1620;
+const frac = f => 0.5*((1/(f*f) - 1/(FMIN*FMIN)) / (1/(FMAX*FMAX) - 1/(FMIN*FMIN))) + 0.5*((f-FMIN)/(FMAX-FMIN));
+
+/* ---------------- part registry ---------------- */
+const PARTS = [], PID = {};
+function addPart(id, obj, meta){
+  const p = Object.assign({id, obj, delay:0}, meta);
+  p.home = obj.position.clone();
+  p.off = new V3(...(meta.off||[0,0,0]));
+  obj.traverse(o=>{ if(o.isMesh) o.userData.partId=id; });
+  ASM.add(obj); PARTS.push(p); PID[id]=p; return p;
+}
+function rodBetween(a,b,r,mat,seg=8){
+  const A=new V3(...a), B=new V3(...b), d=B.clone().sub(A), L=d.length();
+  const m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,L,seg),mat);
+  m.position.copy(A).add(B).multiplyScalar(.5);
+  m.quaternion.setFromUnitVectors(new V3(0,1,0), d.normalize());
+  return m;
+}
+/* wall with rectangular holes; wall lies in plane x=const (side walls) */
+function wallX(grp, x, y0,y1, z0,z1, holes, mat){
+  holes=holes.slice().sort((a,b)=>a[0]-b[0]); let cy=y0;
+  const add=(ya,yb,za,zb)=>{ if(yb-ya>0.01 && zb-za>0.01) grp.add(box(WT, yb-ya, zb-za, mat, x, (ya+yb)/2, (za+zb)/2)); };
+  for(const [ha,hb,hz0,hz1] of holes){ add(cy,ha,z0,z1); add(ha,hb,z0,Math.max(z0,hz0)); add(ha,hb,Math.min(z1,hz1),z1); cy=hb; }
+  add(cy,y1,z0,z1);
+}
+/* rounded-rect ring walls; which: 'all' | 'left' (x<chevron) | 'right' */
+function ringWalls(grp, z0, z1, mat, which='all', leftHoles=[], rightHoles=[]){
+  const h=z1-z0, zc=(z0+z1)/2, xl=-CW/2+CR, xr=CW/2-CR;
+  const topA = which==='right'? CHEV.top : xl, topB = which==='left'? CHEV.top : xr;
+  const botA = which==='right'? CHEV.bot : xl, botB = which==='left'? CHEV.bot : xr;
+  grp.add(box(topB-topA, WT, h, mat, (topA+topB)/2, CH/2-WT/2, zc));
+  grp.add(box(botB-botA, WT, h, mat, (botA+botB)/2, -CH/2+WT/2, zc));
+  if(which!=='right'){
+    if(leftHoles.round){   // one seamless wall piece with a round hole (earphone jack)
+      const [hy,hz,hr]=leftHoles.round, sh=shapeOf(rrectPts(z1-z0, CH-2*CR, 0.01, (z0+z1)/2, 0, 1)); sh.holes.push(holeOf(circPts(hz,hy,hr,48)));
+      const w=new THREE.Group(); w.add(extrude(sh,WT,mat,0)); w.rotation.y=-PI/2; w.position.x=-CW/2+WT; grp.add(w);
+    } else wallX(grp, -CW/2+WT/2, -CH/2+CR, CH/2-CR, z0, z1, leftHoles, mat);
+  }
+  if(which!=='left')  wallX(grp,  CW/2-WT/2, -CH/2+CR, CH/2-CR, z0, z1, rightHoles, mat);
+  const corners=[[xr,CH/2-CR,0,'r'],[xl,CH/2-CR,PI/2,'l'],[xl,-CH/2+CR,PI,'l'],[xr,-CH/2+CR,1.5*PI,'r']];
+  for(const [cx,cy,a0,side] of corners){
+    if(which==='left' && side==='r') continue; if(which==='right' && side==='l') continue;
+    const s=new THREE.Shape(); s.absarc(cx,cy,CR,a0,a0+PI/2,false); s.absarc(cx,cy,CR-WT,a0+PI/2,a0,true);
+    grp.add(extrude(s,h,mat,z0));
+  }
+}
+function arcPts(cx,cy,r,a0,a1,n=22){ const p=[]; for(let i=0;i<=n;i++){ const a=a0+(a1-a0)*i/n; p.push(new V2(cx+Math.cos(a)*r, cy+Math.sin(a)*r)); } return p; }
+const LEFT_PTS = [new V2(CHEV.top,CH/2), ...arcPts(-CW/2+CR,CH/2-CR,CR,PI/2,PI), ...arcPts(-CW/2+CR,-CH/2+CR,CR,PI,1.5*PI), new V2(CHEV.bot,-CH/2), new V2(CHEV.vx,CHEV.vy)];
+const RIGHT_PTS = [new V2(CHEV.top,CH/2), new V2(CHEV.vx,CHEV.vy), new V2(CHEV.bot,-CH/2), ...arcPts(CW/2-CR,-CH/2+CR,CR,1.5*PI,2*PI), ...arcPts(CW/2-CR,CH/2-CR,CR,0,PI/2)];
+const IN=2.3;
+/* Proportions measured from photos of the real set (side view, depth ≈ 35 mm):
+   white back cover ≈ 3.8 mm | maroon main band ≈ 19 mm | groove | maroon front band ≈ 4.8 mm | white front panels ≈ 6 mm proud */
+const FI=1.4, FG=0.35;   // white speaker panel sits inside the maroon frame: 1.4 mm red rim, 0.35 mm gap at the chevron
+const facePts = (d,g) => [new V2(chevX(CH/2-d)-g,CH/2-d), ...arcPts(-CW/2+CR,CH/2-CR,CR-d,PI/2,PI), ...arcPts(-CW/2+CR,-CH/2+CR,CR-d,PI,1.5*PI), new V2(chevX(-CH/2+d)-g,-CH/2+d), new V2(CHEV.vx-g,CHEV.vy)];
+const FACE_PTS = facePts(FI,FG);
+const coverPts = k => [new V2(CHEV.top+IN+k,CH/2-IN-k), new V2(CHEV.vx+IN+k,CHEV.vy), new V2(CHEV.bot+IN+k,-CH/2+IN+k), ...arcPts(CW/2-CR,-CH/2+CR,CR-IN-k,1.5*PI,2*PI), ...arcPts(CW/2-CR,CH/2-CR,CR-IN-k,0,PI/2)];
+const Z_RIM = 11.1;       // top of the maroon front bezel; both white front panels stand ≈6 mm proud of it
+const BEZ_T = 1.2;        // bezel plate thickness (sits just in front of the tuning dial)
+const ZG0=5.5, ZG1=6.3;   // moulded groove between the main band and the front band
+const ZR0 = ZB+3.8;       // rear edge of the maroon frame (white back cover stands 3.8 mm proud)
+const BI = 1.2;           // white back cover inset inside the maroon frame
+/* hollow skirt (side walls) under a panel outline */
+function skirt(outer, inner, z0, z1, mat){ const s=shapeOf(outer); s.holes.push(holeOf(inner)); return extrude(s, z1-z0, mat, z0); }
+const COVER_PTS = [new V2(CHEV.top+IN,CH/2-IN), new V2(CHEV.vx+IN,CHEV.vy), new V2(CHEV.bot+IN,-CH/2+IN), ...arcPts(CW/2-CR,-CH/2+CR,CR-IN,1.5*PI,2*PI), ...arcPts(CW/2-CR,CH/2-CR,CR-IN,0,PI/2)];
+const rectHole = (cx,cy,w,h,r=0.6) => holeOf(rrectPts(w,h,r,cx,cy,3));
+
+const BF={x:-37.3,y:-15,w:15.2,h:10.6};
+/* ---------- white front face (left panel) ---------- */
+(function face(){
+  const g=new THREE.Group();
+  const pitch=2.8, R=SPK.r-1.8, RG=R+0.9;
+  // solid panel with softly rounded edges and a round opening for the grille insert
+  const s=shapeOf(FACE_PTS); s.holes.push(holeOf(circPts(SPK.x,SPK.y,RG,96)));
+  g.add(bevelPlate(s,WT,MAT.shell,Z_FACE,0.7));
+  // deep side walls: the panel is a tray that sits in the maroon bezel and stands ≈6 mm proud of it
+  g.add(skirt(FACE_PTS, facePts(FI+1.3,FG+1.3), Z_RIM-BEZ_T+0.2, Z_FACE+0.75, MAT.shell));
+  // grille insert: horizontal slots split by a vertical bar (flush with the panel)
+  const gs=shapeOf(circPts(SPK.x,SPK.y,RG+0.72,96));
+  for(let k=-12;k<=12;k++){
+    const yc=SPK.y+(k+0.5)*pitch, dy=Math.abs(yc-SPK.y); if(dy>R-1) continue;
+    const w=Math.sqrt(R*R-dy*dy)-0.4; if(w<2.5) continue;
+    { let x0=SPK.x-w+0.65, x1=SPK.x-0.65; if(Math.abs(yc-BF.y)<BF.h/2+1.2) x0=Math.max(x0,BF.x+BF.w/2+0.9); if(x1-x0>2) gs.holes.push(rectHole((x0+x1)/2, yc, x1-x0, 1.55, 0.7)); }
+    gs.holes.push(rectHole(SPK.x+(w+1.3)/2, yc, w-1.3, 1.55, 0.7));
+  }
+  g.add(extrude(gs,1.2,MAT.shell,ZF-1.23));
+  // raised horizontal ribs
+  for(let k=-14;k<=13;k++){
+    const y=SPK.y+k*pitch; if(Math.abs(y)>CH/2-FI-1.0) continue;
+    const rr=CR-FI, dyc=Math.max(0,Math.abs(y)-(CH/2-CR)); const xs=-CW/2+FI+(rr-Math.sqrt(Math.max(0,rr*rr-dyc*dyc)))+0.35;
+    const xe=chevX(y)-FG-1.0; if(xe-xs<2) continue;
+    const segs = Math.abs(y-BF.y) < BF.h/2+0.5 ? [[xs,BF.x-BF.w/2-0.4],[BF.x+BF.w/2+0.4,xe]] : [[xs,xe]];
+    for(const [a,b] of segs){ if(b-a<1) continue; const rb=cylX(0.55,b-a,MAT.shell,(a+b)/2,y,ZF+0.02,14); rb.scale.set(1,1,0.9); g.add(rb); }
+  }
+  // moulded frame that holds the badge
+  g.add(bevelPlate(shapeOf(rrectPts(BF.w,BF.h,0.8,BF.x,BF.y,4)),0.9,MAT.shell,ZF-0.3,0.35));
+  addPart('face', g, {name:'白色前面板（喇叭网）', des:'—', cat:'case', stage:'mech', off:[0,0,92], delay:.02, label:'前面板',
+    spec:'白色 ABS · 横向凸棱装饰 · 圆形横条缝喇叭网',
+    desc:'2P3 最具辨识度的部件：一整块白色面板上布满<b>横向凸棱</b>，中间的圆形区域开出一排排<b>横条缝</b>作喇叭网，一根竖筋把网孔左右分开——这是 1960 年代国产晶体管收音机的经典造型。面板右缘是一条 <b>“<”形折线</b>，折线处是一道实心的酒红色凸筋，把左右两块白色面板分开。扬声器就贴在网孔背后。',
+    rel:['badge','speaker','body','cover']});
+})();
+/* ---------- red badge ---------- */
+function drawBadge(c,w,h,bump){
+  // relief artwork: rising sun with rays + “东方红” in running-cursive calligraphy
+  const R=bump?'#6a6a6a':'#c9161d';
+  c.fillStyle=R; c.fillRect(0,0,w,h);
+  const cx=w*0.5, cy=h*0.97;
+  for(let i=0;i<29;i++){ const a=PI*(0.03+i*0.94/28); const L=Math.hypot(w,h);
+    c.fillStyle = bump ? (i%2?'#9a9a9a':'#5a5a5a') : (i%2?'rgba(255,120,110,.20)':'rgba(90,0,0,.10)');
+    c.beginPath(); c.moveTo(cx,cy); c.lineTo(cx+Math.cos(a-0.022)*L, cy-Math.sin(a-0.022)*L); c.lineTo(cx+Math.cos(a+0.022)*L, cy-Math.sin(a+0.022)*L); c.closePath(); c.fill(); }
+  c.fillStyle= bump?'#d0d0d0':'rgba(255,140,120,.25)'; c.beginPath(); c.arc(cx,cy,h*0.27,PI,2*PI); c.fill();
+  c.strokeStyle= bump?'#f0f0f0':'rgba(255,170,150,.35)'; c.lineWidth=h*0.02; c.beginPath(); c.arc(cx,cy,h*0.27,PI,2*PI); c.stroke();
+  c.textAlign='center'; c.textBaseline='middle';
+  c.font=`${h*0.5}px "MaoCao","STXingkai","Xingkai SC","KaiTi",serif`;
+  if(bump){ c.fillStyle='#ffffff'; c.fillText('东方红',w*0.5,h*0.42); }
+  else { c.fillStyle='rgba(120,0,0,.35)'; c.fillText('东方红',w*0.5+w*0.006,h*0.42+h*0.012); c.fillStyle='rgba(255,165,150,.55)'; c.fillText('东方红',w*0.5,h*0.42); }
+  c.strokeStyle= bump?'#bbbbbb':'rgba(255,190,170,.35)'; c.lineWidth=h*0.03; c.strokeRect(h*0.03,h*0.03,w-h*0.06,h*0.06>0?h-h*0.06:h);
+}
+(function badge(){
+  const g=new THREE.Group(); g.position.set(BF.x,BF.y,ZF+0.6);
+  const W=13.4, H=8.9;
+  g.add(box(W,H,0.9,MAT.badge,0,0,0.45));
+  const col=canvasTex(680,430,(c,w,h)=>drawBadge(c,w,h,false));
+  const bmp=canvasTex(680,430,(c,w,h)=>drawBadge(c,w,h,true),false);
+  const top=new THREE.Mesh(new THREE.PlaneGeometry(W-0.1,H-0.1), new THREE.MeshStandardMaterial({map:col, bumpMap:bmp, bumpScale:1.4, roughness:.42, envMapIntensity:.6}));
+  top.position.z=0.91; g.add(top);
+  const redraw=()=>{ for(const [t,b] of [[col,false],[bmp,true]]){ const cv=t.userData.canvas; drawBadge(cv.getContext('2d'),cv.width,cv.height,b); t.needsUpdate=true; } };
+  if(document.fonts && document.fonts.load) document.fonts.load('40px "MaoCao"','东方红').then(redraw).catch(()=>{});
+  addPart('badge', g, {name:'红色铭牌', des:'—', cat:'case', stage:'mech', off:[0,0,122], delay:0,
+    spec:'红色塑料浮雕标牌 · 嵌在面板的方框内', desc:'嵌在喇叭网左下角白色方框里的红色浮雕小铭牌，复刻 60 年代原版 2P3 的“红标”：背景是一轮初升的太阳放射万丈光芒，上方是书法体“东方红”三个字（本模型用开源行草字体近似毛体书法）。套件附带的标牌两面分别是“东方红”和“工农兵”，可以任选一面朝外装。', rel:['face']});
+})();
+
+/* ---------- maroon body (middle frame + right bezel) ---------- */
+(function body(){
+  const g=new THREE.Group();
+  const JH=Object.assign([],{round:[21,0.6,3.0]}); ringWalls(g, ZR0+1.0, ZG0, MAT.case, 'all', JH);
+  { const rs=shapeOf(rrectPts(CW,CH,CR,0,0,22)); rs.holes.push(holeOf(rrectPts(CW-2*BI+0.3,CH-2*BI+0.3,CR-BI+0.15,0,0,22))); g.add(bevelPlate(rs,1.6,MAT.case,ZR0,0.5)); }
+  ringWalls(g, ZG1, Z_RIM-0.4, MAT.case, 'all', [], [[DIAL.y-12,DIAL.y+12,SLOT_Z0,SLOT_Z1]]);
+  // the moulded groove that runs round the case just behind the front bezel
+  const gr=shapeOf(rrectPts(CW-1.0,CH-1.0,CR-0.5,0,0,22)); gr.holes.push(holeOf(rrectPts(CW-2*WT-0.2,CH-2*WT-0.2,CR-WT,0,0,22)));
+  g.add(extrude(gr,ZG1-ZG0,MAT.caseInner,ZG0));
+  // raised guard round the tuning-wheel slot on the right side
+  // only a low moulded lip (≈0.7 mm) frames the slot – the wheel's rim is what sticks out
+  { const zc=(SLOT_Z0+SLOT_Z1)/2, fr=shapeOf(rrectPts(SLOT_Z1-SLOT_Z0+1.8,27.4,1.0,-zc,DIAL.y,6)); fr.holes.push(holeOf(rrectPts(SLOT_Z1-SLOT_Z0,24.2,0.6,-zc,DIAL.y,6)));
+    const lip=new THREE.Group(); lip.add(bevelPlate(fr,1.2,MAT.case,0,0.3)); lip.rotation.y=PI/2; lip.position.x=CW/2-0.2; g.add(lip); }
+  // one maroon front bezel: chevron strip + frame round the right-hand cover + narrow rim round the speaker panel
+  const bz=shapeOf(rrectPts(CW,CH,CR,0,0,22)); bz.holes.push(holeOf(FACE_PTS)); bz.holes.push(rectHole(WIN.x,WIN.y,WIN.ow+0.6,WIN.oh+0.6)); bz.holes.push(rectHole(SLOT.x,SLOT.y,SLOT.ow+0.6,SLOT.oh+0.6));
+  g.add(bevelPlate(bz,BEZ_T,MAT.case,Z_RIM-BEZ_T,0.4));
+  // the red "<" line between the two white panels is a solid moulded rib (not a gap), standing almost as high as the panels
+  { const yt=CH/2-FI, yb=-(CH/2-FI), e=0.12;
+    const xf=y=>chevX(y)-FG+e;
+    const xc=y=> (y>=0 ? CHEV.vx+IN + y/(CH/2-IN)*(CHEV.top-CHEV.vx) : CHEV.vx+IN + (-y)/(CH/2-IN)*(CHEV.bot-CHEV.vx)) - e;
+    const rib=shapeOf([new V2(xf(yt),yt), new V2(xf(0),0), new V2(xf(yb),yb), new V2(xc(yb),yb), new V2(xc(0),0), new V2(xc(yt),yt)]);
+    const z0=Z_RIM-0.3, zt=Z_FACE+WT-0.45; g.add(bevelPlate(rib, zt-z0, MAT.case, z0, 0.45)); }
+  // inner seam line + bosses
+  g.add(box(CW-2*CR,0.5,0.4,MAT.caseInner,0,-CH/2-0.02,Z_BODY0+3));
+  for(const [x,y] of PCB_SCREWS){ const zt=Z_RIM-BEZ_T; g.add(cylZ(2.6,zt-PCB.front,MAT.caseInner,x,y,(zt+PCB.front)/2,16)); }
+  // metal bushing of the 3.5 mm earphone jack, flush on the left side wall
+  const nk=std(0xd8dadc,{metalness:1, roughness:.2});
+  const ring=(ro,ri,d)=>{ const sh=shapeOf(circPts(0,0,ro,48)); sh.holes.push(holeOf(circPts(0,0,ri,40))); const m=extrude(sh,d,nk); return m; };
+  // round, slightly countersunk opening in the side wall; the nickel nut sits below the wall surface
+  const jb=new THREE.Group(); jb.position.set(-CW/2+1.15,21,0.6); jb.rotation.y=-PI/2;
+  jb.add(ring(2.85,1.9,0.35)); const collar=ring(2.3,1.85,0.72); jb.add(collar);
+  jb.add(mesh(new THREE.CircleGeometry(1.86,32),std(0x0c0c0d,{roughness:.9}),0,0,-1.5));
+  const inner=new THREE.Mesh(new THREE.CylinderGeometry(1.86,1.86,2.4,32,1,true),std(0x9a9ea3,{metalness:1,roughness:.35,side:THREE.BackSide})); inner.rotation.x=PI/2; inner.position.z=-0.2; jb.add(inner);
+  g.add(jb);
+  addPart('body', g, {name:'酒红色中框', des:'—', cat:'case', stage:'mech', off:[0,0,66], delay:.05, label:'中框',
+    spec:'酒红色 ABS · 四周侧壁 + 右侧窗框',
+    desc:'整机的“骨架”，构成四周侧壁；前后两圈酒红色边沿把白色前面板和白色后盖<b>嵌在框内</b>（白色前面板高出红框约 6 mm、白色后盖高出约 4 mm，形成前后分明的层次；中框本身又被一道凹槽分成宽的主色带和窄的前色带），露在外面的酒红色色带就是它。右前方是一块带<b>方形刻度窗</b>和<b>竖条音量窗</b>的窗框；右侧壁开有槽口让<b>调谐拨盘</b>边缘露出，左侧壁开有<b>耳机插孔</b>圆孔。内部立柱用来固定电路板。',
+    rel:['face','cover','back','dial','w','jack']});
+})();
+
+/* tapered rectangular funnel: outer rim (ow×oh) at zTop, inner opening (iw×ih) at zTop-d */
+function recess(cx,cy,iw,ih,ow,oh,d,zTop,mat,lip=1.2){
+  const O=[[-ow/2,-oh/2],[ow/2,-oh/2],[ow/2,oh/2],[-ow/2,oh/2]], I=[[-iw/2,-ih/2],[iw/2,-ih/2],[iw/2,ih/2],[-iw/2,ih/2]];
+  const p=[]; const zi=zTop-d, zo=zTop-0.05;
+  for(let k=0;k<4;k++){ const a=O[k], b=O[(k+1)%4], c=I[(k+1)%4], e=I[k];
+    p.push(cx+a[0],cy+a[1],zo, cx+b[0],cy+b[1],zo, cx+c[0],cy+c[1],zi,  cx+a[0],cy+a[1],zo, cx+c[0],cy+c[1],zi, cx+e[0],cy+e[1],zi); }
+  // short straight lip at the inner end
+  for(let k=0;k<4;k++){ const a=I[k], b=I[(k+1)%4]; const z2=zi-lip;
+    p.push(cx+a[0],cy+a[1],zi, cx+b[0],cy+b[1],zi, cx+b[0],cy+b[1],z2,  cx+a[0],cy+a[1],zi, cx+b[0],cy+b[1],z2, cx+a[0],cy+a[1],z2); }
+  const geo=new THREE.BufferGeometry(); geo.setAttribute('position',new THREE.Float32BufferAttribute(p,3)); geo.computeVertexNormals();
+  const mm=mat.clone(); mm.side=THREE.DoubleSide; return new THREE.Mesh(geo,mm);
+}
+/* ---------- white right cover plate ---------- */
+const COVER_W = (CW/2-IN)-(CHEV.vx+IN);
+function drawCover(g,w,h){
+  const S=w/COVER_W, X=x=>(x-(CHEV.vx+IN))*S, Y=y=>((CH/2-IN)-y)*S;
+  g.fillStyle='#e6e1d6'; g.fillRect(0,0,w,h);
+  g.strokeStyle='#c8231c'; g.lineWidth=0.55*S; g.lineCap='round'; g.lineJoin='round';
+  g.beginPath(); g.moveTo(X(WIN.x-1.5),Y(30.6)); g.lineTo(X(WIN.x),Y(29.3)); g.lineTo(X(WIN.x+1.5),Y(30.6)); g.stroke();
+  g.fillStyle='#141414'; g.textAlign='center'; g.textBaseline='middle';
+  g.font=`700 ${6.2*S}px "DIN Condensed","Bahnschrift Condensed","Arial Narrow","Roboto Condensed",${FONT}`; g.fillText('2P3', X(43.2), Y(-2.2));
+  g.font=`600 ${3.3*S}px ${FONT}`; g.fillText('关', X(34.0), Y(-11.6));
+  g.strokeStyle='#c8231c'; g.lineWidth=0.75*S; g.lineCap='butt'; g.lineJoin='miter';
+  g.beginPath(); g.moveTo(X(32.3),Y(-15.2)); g.lineTo(X(34.1),Y(-31)); g.lineTo(X(35.9),Y(-15.2)); g.stroke();
+}
+const coverTex = canvasTex(Math.round(COVER_W*20),1412,drawCover);
+coverTex.repeat.set(1/COVER_W, 1/(CH-2*IN)); coverTex.offset.set(-(CHEV.vx+IN)/COVER_W, (CH/2-IN)/(CH-2*IN));
+(function cover(){
+  const g=new THREE.Group();
+  const s=shapeOf(COVER_PTS); s.holes.push(rectHole(WIN.x,WIN.y,WIN.ow,WIN.oh,0.8)); s.holes.push(rectHole(SLOT.x,SLOT.y,SLOT.ow,SLOT.oh,0.8));
+  const zTop=Z_FACE+WT, z0=zTop-1.4;
+  const m=bevelPlate(s,1.4,[std(0xffffff,{map:coverTex, roughness:.45, envMapIntensity:.45}), MAT.shell],z0,0.55); g.add(m);
+  // side walls: a raised white block with chamfered edges, ≈6 mm proud of the maroon bezel
+  g.add(skirt(COVER_PTS, coverPts(1.3), Z_RIM-0.05, z0+0.6, MAT.shell));
+  // recessed, tapered openings (like the moulded windows of the real set) + tunnels down to the bezel
+  g.add(recess(WIN.x,WIN.y,WIN.w,WIN.h,WIN.ow,WIN.oh,WIN.d,zTop,MAT.shellInner, zTop-WIN.d-Z_RIM+BEZ_T));
+  g.add(recess(SLOT.x,SLOT.y,SLOT.w,SLOT.h,SLOT.ow,SLOT.oh,SLOT.d,zTop,MAT.shellInner, zTop-SLOT.d-12.2));
+  addPart('cover', g, {name:'右侧白色面板', des:'—', cat:'case', stage:'mech', off:[0,0,108], delay:0, label:'右面板',
+    spec:'白色 ABS 盖板 · 丝印“2P3 / 关 / V”',
+    desc:'嵌在酒红色窗框里的白色小面板。顶部的红色小“v”指向<b>方形刻度窗</b>，窗里能看到刻度盘上的频率数字（53、6、7、8…×100 kHz）；下方竖条窗露出<b>音量拨轮</b>的滚花边，旁边印着“关”和红色大“V”——往“关”的方向拨到底即关机，往下拨音量逐渐增大。',
+    rel:['dial','w','body']});
+})();
+
+/* ---------- white back cover ---------- */
+const BT=2.6, BZS=ZB+1.8;   // back cover thickness; floor of the screw counterbore   // back cover thickness; floor of the screw counterbore
+const LOUV={cols:[-8,-29.5], w:18, h:3.0, rows:[17,11.6,6.2,0.8,-4.6,-10]};
+(function back(){
+  const g=new THREE.Group();
+  const s=shapeOf(rrectPts(CW-2*BI,CH-2*BI,CR-BI,0,0,22));   // sits inside the maroon rear rim
+  for(const cx of LOUV.cols) for(const y of LOUV.rows) s.holes.push(rectHole(cx,y,LOUV.w,LOUV.h,0.45));
+  s.holes.push(holeOf(circPts(BACK_SCREW[0],BACK_SCREW[1],3.35,40)));
+  g.add(bevelPlate(s,BT,MAT.shell,ZB,0.7));
+  // inner skirt: keeps the seam between cover and red rim from showing the inside of the set
+  // deep side walls (the cover is a shallow tray whose rim slides into the maroon frame)
+  g.add(skirt(rrectPts(CW-2*BI,CH-2*BI,CR-BI,0,0,22), rrectPts(CW-2*BI-2.6,CH-2*BI-2.6,CR-BI-1.3,0,0,22), ZB+0.8, ZR0+1.6, MAT.shell));
+  // louvre blades behind each slot: slanted white surfaces (moulded louvres, you cannot see into the set)
+  const blade=std(0xe9e5dc,{roughness:.35, envMapIntensity:.5});
+  for(const cx of LOUV.cols){
+    g.add(box(LOUV.w+1.5, 36, 0.6, MAT.shellInner, cx, 3.5, ZB+BT+2.4));          // backing wall hides the inside
+    for(const y of LOUV.rows){ const b=box(LOUV.w+1.4, LOUV.h*2.3, 0.7, blade, cx, y+0.2, ZB+BT+0.2); b.rotation.x=0.78; g.add(b); }
+  }
+  // boss for the screw
+  g.add(cylZ(4.4,1.2,MAT.shellInner,BACK_SCREW[0],BACK_SCREW[1],BZS+0.6,32));      // boss = floor of the counterbore
+  const cw=new THREE.Mesh(new THREE.CylinderGeometry(3.35,3.35,BZS-ZB,40,1,true),std(0xd9d5cb,{roughness:.6,side:THREE.BackSide})); cw.rotation.x=PI/2; cw.position.set(BACK_SCREW[0],BACK_SCREW[1],(ZB+BZS)/2); g.add(cw);
+  addPart('back', g, {name:'白色后盖', des:'—', cat:'case', stage:'mech', off:[0,0,-86], delay:.04, label:'后盖',
+    spec:'白色 ABS · 两列百叶式出声窗（6×2）· 一颗螺丝固定',
+    desc:'整机背面的白色盖板，靠一颗十字螺丝锁在电路板的六角铜柱上，拧下它即可打开后盖更换电池。右侧（背面看）两列、每列六条的<b>百叶式出声窗</b>正对扬声器背面：斜置的叶片挡住视线，但让纸盆后方的空气流通。',
+    rel:['backscrew','standoff','body']});
+})();
+(function backScrew(){
+  const g=new THREE.Group(); const [x,y]=BACK_SCREW;
+  const nk=std(0xd4d6d8,{metalness:1, roughness:.22});
+  // everything sits inside the counterbore, the head is flush with / slightly below the cover surface
+  const zs=BZS;                                    // floor of the counterbore
+  g.add(cylZ(3.0,0.4,nk,x,y,zs-0.2,40));           // washer
+  const dg=new THREE.SphereGeometry(2.45,40,14,0,PI*2,0,PI/2); dg.rotateX(-PI/2);
+  const dome=new THREE.Mesh(dg,nk); dome.position.set(x,y,zs-0.4); dome.scale.z=0.42; g.add(dome);   // top at ≈ ZB+0.2
+  const rm=std(0x3a3c3f,{metalness:.8, roughness:.5});
+  const c1=box(2.6,0.55,0.8,rm,x,y,zs-1.1); c1.rotation.z=PI/4+0.3; g.add(c1);
+  const c2=box(0.55,2.6,0.8,rm,x,y,zs-1.1); c2.rotation.z=PI/4+0.3; g.add(c2);
+  g.add(cylZ(1.0,7,MAT.steel,x,y,zs+3.5,14));
+  const h=helix(0,6,8,1.05,0.18,MAT.steel); h.rotation.y=-PI/2; h.position.set(x,y,zs+0.4); g.add(h);
+  addPart('backscrew', g, {name:'后盖螺丝', des:'—', cat:'case', stage:'mech', off:[0,0,-110], delay:0,
+    spec:'M2.5 十字盘头螺丝 + 垫圈（镀镍）· 沉头孔安装', desc:'唯一一颗外露螺丝，沉在后盖的沉孔里（不凸出盖面），穿过后盖拧入电路板上的六角铜柱。', rel:['back','standoff']});
+})();
+(function standoff(){
+  const g=new THREE.Group(); const [x,y]=BACK_SCREW; const h=PCB.back-BZS;
+  g.add(cylZ(2.5,h,MAT.brass,x,y,PCB.back-h/2,6));
+  addPart('standoff', g, {name:'六角铜柱', des:'—', cat:'case', stage:'mech', off:[0,0,-46], delay:.12,
+    spec:'M2.5 六角铜柱 · 长约 19 mm', desc:'固定在电路板元件面上的六角铜柱，后盖螺丝拧进它，从而把后盖、电路板与机壳连成一体。', rel:['backscrew','back','pcb']});
+})();
+(function pcbScrews(){
+  const g=new THREE.Group();
+  for(const [x,y] of PCB_SCREWS){
+    g.add(cylZ(2.1,1.3,MAT.steel,x,y,PCB.back-0.65,20));
+    g.add(box(2.8,0.5,0.3,MAT.black,x,y,PCB.back-1.32)); g.add(box(0.5,2.8,0.3,MAT.black,x,y,PCB.back-1.32));
+    g.add(cylZ(0.9,6,MAT.steel,x,y,PCB.back+3,12));
+  }
+  addPart('pcbscrews', g, {name:'电路板螺丝 ×3', des:'—', cat:'case', stage:'mech', off:[0,0,-26], delay:.2,
+    spec:'M2 自攻螺丝', desc:'从元件面穿过电路板，把电路板锁在中框内侧的立柱上。', rel:['pcb','body']});
+})();
+
+/* ---------- tuning dial (front side of PCB) ---------- */
+const DIAL_LABELS=[[530,'53'],[600,'6'],[700,'7'],[800,'8'],[1000,'10'],[1200,'12'],[1600,'16']];
+function drawDial(g,w){
+  const R=16.4, S=w/2/R, C=w/2;
+  const P=(r,a)=>[C+Math.cos(a)*r*S, C-Math.sin(a)*r*S];
+  g.fillStyle='#f5f3ec'; g.beginPath(); g.arc(C,C,w/2,0,PI*2); g.fill();
+  g.strokeStyle='#1d1d1d';
+  for(let f=530; f<=1620; f+=10){ const a=PI/2+frac(f)*PI; const major=f%100===0||f===530; if(!major && f%50) continue;
+    const [x0,y0]=P(16.0,a),[x1,y1]=P(major?14.4:15.1,a); g.lineWidth=(major?.28:.16)*S; g.beginPath(); g.moveTo(x0,y0); g.lineTo(x1,y1); g.stroke(); }
+  g.fillStyle='#161616'; g.textAlign='center'; g.textBaseline='middle';
+  for(const [f,t] of DIAL_LABELS){ const a=PI/2+frac(f)*PI; const [x,y]=P(9.7,a); g.save(); g.translate(x,y); g.rotate(-(a-PI/2)); g.font=`700 ${3.3*S}px "DIN Condensed","Arial Narrow",${FONT}`; g.fillText(t,0,0); g.restore(); }
+  g.fillStyle='#c8231c'; g.font=`700 ${1.6*S}px ${FONT}`; const [mx,my]=P(9.5,-PI/4); g.fillText('MW',mx,my);
+}
+const dialTex = canvasTex(512,512, drawDial);
+(function dial(){
+  const g=new THREE.Group(); g.position.set(DIAL.x,DIAL.y,DIAL.z);
+  g.add(knurlDisc(DIAL.r,2.2,84,0.55,MAT.white,16.2));
+  g.add(cylZ(16.4,1.6,MAT.white,0,0,0.8,72));
+  g.add(cylZ(2.2,1.3,MAT.white,0,0,-0.6,24));   // boss that couples the dial to the capacitor shaft
+  g.add(mesh(new THREE.CircleGeometry(16.4,72), std(0xffffff,{map:dialTex, roughness:.45}), 0,0,1.62));
+  const hub=new THREE.Mesh(new THREE.CylinderGeometry(3.6,3.6,1.2,8),MAT.white); hub.rotation.x=PI/2; hub.position.z=2.2; g.add(hub);
+  g.add(cylZ(1.4,0.4,MAT.steel,0,0,2.9,16)); g.add(box(2.2,0.4,0.2,MAT.black,0,0,3.1));
+  addPart('dial', g, {name:'调谐拨盘（刻度盘）', des:'—', cat:'tune', stage:'tune', off:[0,0,38], delay:.08, label:'调谐拨盘',
+    spec:'Ø31 mm 白色滚花拨盘 · 印刷刻度 53–16（×100 kHz）',
+    desc:'直接装在双联可变电容转轴上的小圆盘，位于电路板正面。它的滚花边从机壳<b>右侧槽口</b>露出，用拇指拨动即可带动双联旋转选台；盘面上的数字透过前面的<b>方形小窗</b>显示当前频率（53 = 530 kHz，16 = 1600 kHz）。刻度在高端明显变密，因为频率与电容的平方根成反比。',
+    rel:['vc','cover','body']});
+})();
+
+/* ---------- speaker ---------- */
+(function speaker(){
+  const g=new THREE.Group(); g.position.set(SPK.x,SPK.y,0);
+  const ring=shapeOf(circPts(0,0,SPK.r,96)); ring.holes.push(holeOf(circPts(0,0,26.2,96)));
+  g.add(extrude(ring,0.5,MAT.steel,14.9));
+  const gk=shapeOf(circPts(0,0,SPK.r-0.2,96)); gk.holes.push(holeOf(circPts(0,0,27,96)));
+  g.add(extrude(gk,0.3,MAT.foam,15.4));
+  const cone=[]; for(const [r,z] of [[6.6,9.6],[8,10.1],[11,11.2],[15,12.6],[19,13.7],[23,14.5],[25.4,14.9]]) cone.push(new V2(r,z));
+  const cg=new THREE.LatheGeometry(cone,64); cg.rotateX(PI/2); g.add(new THREE.Mesh(cg, std(0x141414,{roughness:1, side:THREE.DoubleSide, envMapIntensity:.2})));
+  const sur=[]; for(let i=0;i<=12;i++){ const a=PI-i/12*PI; sur.push(new V2(25.9+Math.cos(a)*0.6, 14.9+Math.sin(a)*0.6)); }
+  const sg=new THREE.LatheGeometry(sur,64); sg.rotateX(PI/2); g.add(new THREE.Mesh(sg, std(0x2a2a2b,{roughness:.8, side:THREE.DoubleSide})));
+  const dc=new THREE.SphereGeometry(7,32,10,0,PI*2,0,0.95); dc.rotateX(PI/2); const dm=new THREE.Mesh(dc,std(0x252526,{roughness:.6})); dm.scale.z=.5; dm.position.z=6.6; g.add(dm);
+  for(let i=0;i<4;i++){ const a=PI/4+i*PI/2; g.add(rodBetween([Math.cos(a)*27.2,Math.sin(a)*27.2,14.9],[Math.cos(a)*8.8,Math.sin(a)*8.8,7.4],0.8,MAT.steel,6)); }
+  g.add(cylZ(9,1,MAT.steel,0,0,7,40));
+  g.add(cylZ(10,3.6,MAT.ferrite,0,0,4.7,40));
+  g.add(cylZ(9,1,MAT.steel,0,0,2.4,40));
+  g.add(cylZ(2.6,0.4,MAT.chrome,0,0,1.7,20));
+  const lab=decal(10,5.4,textTex([{t:'8Ω',size:64}],{w:260,h:140,color:'#e9e9e9',weight:700})); lab.position.set(0,-3.2,1.88); lab.rotation.y=PI; g.add(lab);
+  const tb=new THREE.Group(); tb.position.set(23.2,8.6,12.4); tb.rotation.z=0.36+PI/2;
+  tb.add(box(7,3.6,0.8,std(0x7a4a24,{roughness:.6}))); tb.add(box(1.4,2.6,0.4,MAT.tin,-2,0,-0.6)); tb.add(box(1.4,2.6,0.4,MAT.tin,2,0,-0.6));
+  g.add(tb);
+  addPart('speaker', g, {name:'扬声器', des:'SP', cat:'audio', stage:'out', off:[-6,0,44], delay:.1, label:'扬声器',
+    spec:'Ø57 mm 外磁动圈扬声器 · 8 Ω',
+    desc:'贴在喇叭网背后，把功放输出的音频电流还原成声音：电流流过纸盆根部的<b>音圈</b>，音圈处在背后铁氧体<b>永磁体</b>的磁隙中受力振动，推动纸盆发声。为了让整机做得更薄，<b>磁钢正好穿过电路板中间的大圆孔</b>。两根引线焊到电路板的 SP 焊盘上。',
+    rel:['face','ic','jack']});
+})();
+
+/* ---------- battery holder & cells (rear side of PCB) ---------- */
+const CELL_Z = -4.9;
+(function holder(){
+  const g=new THREE.Group(); g.position.set(BATT.x,BATT.y,0);
+  const hm=std(0xf1efe8,{roughness:.35, transparent:true, opacity:.9});
+  const zt=PCB.back, zb=-12.4, h=zt-zb, zc=(zt+zb)/2;
+  g.add(box(BATT.w,BATT.h,1.0,hm,0,0,zt-0.5));
+  g.add(box(BATT.w,1.1,h,hm,0,BATT.h/2-0.55,zc)); g.add(box(BATT.w,1.1,h,hm,0,-BATT.h/2+0.55,zc));
+  g.add(box(1.1,BATT.h,h,hm,BATT.w/2-0.55,0,zc)); g.add(box(1.1,BATT.h,h,hm,-BATT.w/2+0.55,0,zc));
+  g.add(box(BATT.w-2.2,0.9,6,hm,0,0,zt-3.5));
+  for(let i=0;i<5;i++) g.add(cylZ(1.1,0.2,std(0x1a6a3a,{roughness:.6}),-16+i*8,0,zt-1.05,12));
+  for(const [i,y] of [[0,-7],[1,7]]){
+    const left = i===0;
+    const sp=helix(0,4.2,5,2.9,0.33,MAT.steel); sp.position.set(left?-27.2:22.9,y,CELL_Z); g.add(sp);
+    g.add(box(0.5,7,7,MAT.nickel,left?-27.3:27.3,y,CELL_Z));
+    g.add(box(0.5,7,7,MAT.nickel,left?27.3:-27.3,y,CELL_Z));
+  }
+  g.add(box(0.4,15,3,MAT.nickel,27.6,0,CELL_Z));
+  addPart('holder', g, {name:'电池盒', des:'BT', cat:'power', stage:'power', off:[0,0,-34], delay:.2, label:'电池盒',
+    spec:'2 节 AA · 直接焊在电路板元件面',
+    desc:'白色半透明电池架，直接用触片焊在电路板左下方（从正面看），开口朝后，打开后盖就能换电池。内部<b>弹簧与平片触点</b>把两节 5 号电池首尾串联成 3 V。',
+    rel:['bat','back','d2','c14']});
+})();
+function drawCell(g,w,h){
+  const gr=g.createLinearGradient(0,0,w,0); gr.addColorStop(0,'#16452b'); gr.addColorStop(.5,'#2c7a4d'); gr.addColorStop(1,'#16452b');
+  g.fillStyle=gr; g.fillRect(0,0,w,h);
+  g.fillStyle='#e8c34a'; g.fillRect(0,h*0.08,w,h*0.05);
+  g.save(); g.translate(w*0.5,h*0.55); g.rotate(-PI/2);
+  g.fillStyle='#f6f2e6'; g.textAlign='center'; g.textBaseline='middle';
+  g.font=`800 ${w*0.22}px ${FONT}`; g.fillText('AA  1.5V',0,-w*0.05);
+  g.font=`600 ${w*0.12}px ${FONT}`; g.fillText('ALKALINE  LR6',0,w*0.17);
+  g.restore();
+}
+(function cells(){
+  const g=new THREE.Group(); g.position.set(BATT.x,BATT.y,CELL_Z);
+  const tex=canvasTex(256,512,drawCell); const lm=std(0xffffff,{map:tex, roughness:.35});
+  for(let i=0;i<2;i++){
+    const c=new THREE.Group(); c.position.y = i? 7 : -7; if(i) c.rotation.z=PI;
+    const body=new THREE.Mesh(new THREE.CylinderGeometry(7.2,7.2,48.6,40),lm); body.geometry.rotateZ(-PI/2); c.add(body);
+    c.add(cylX(7.0,0.5,MAT.nickel,24.5,0,0,40)); c.add(cylX(2.6,1.4,MAT.nickel,25.4,0,0,24));
+    c.add(cylX(7.0,0.6,MAT.nickel,-24.5,0,0,40));
+    g.add(c);
+  }
+  addPart('bat', g, {name:'5 号电池 ×2', des:'BT', cat:'power', stage:'power', off:[0,0,-58], delay:.25, label:'电池',
+    spec:'AA 1.5 V × 2 串联 = 3 V · 静态电流约 7 mA',
+    desc:'整机电源。两节串联提供 3 V：一路经音量拨轮上的<b>电源开关</b>直接供给功放 TA7368；另一路经限流电阻和三只 1N4148 串联<b>稳压</b>到约 1.8 V，供给三只 9018 高频管，使电池电压下降时高频部分仍能稳定工作。',
+    rel:['holder','d2','r7','c14']});
+})();
+
+/* ---------- ferrite antenna (rear side, along the top) ---------- */
+(function rod(){
+  const g=new THREE.Group(); g.position.set(ROD.x,ROD.y,ROD.z);
+  g.add(cylX(ROD.r,ROD.L,MAT.ferrite,0,0,0,32));
+  g.add(helix(-41,-19,58,ROD.r+0.28,0.19,MAT.enamel));
+  g.add(helix(19.5,41.5,58,ROD.r+0.28,0.19,MAT.enamel));
+  for(const x of [-41.6,-18.4,18.9,42.1]) g.add(cylX(ROD.r+0.55,1.2,std(0xd9d6cc,{roughness:.6}),x,0,0,32));
+  addPart('rod', g, {name:'磁性天线（磁棒 + 双线圈）', des:'B1', cat:'tune', stage:'ant', off:[0,14,-30], delay:.14, label:'磁棒天线',
+    spec:'中波铁氧体磁棒 Ø8×84 mm · 两端各一组多股线圈',
+    desc:'整台收音机的“耳朵”，横贯机内顶部。铁氧体磁棒把电台电磁波的<b>磁力线</b>聚拢，在绕在上面的线圈中感应出微弱的高频电压。2P3 的特点是<b>两组线圈分别绕在磁棒两端</b>：一组与双联天线联组成 LC 谐振回路选出电台，另一组把信号耦合到变频管 Q1。线圈可在磁棒上滑动以调整电感，用于低端统调。磁棒天线有明显方向性，转动机身可以“避开”强台、挑出弱台。',
+    rel:['vc','q1','holders']});
+})();
+(function holders(){
+  const g=new THREE.Group();
+  for(const x of [-3,8]){
+    g.add(box(4.5,6,1.6,MAT.white,x,ROD.y,PCB.back-0.8));
+    const tg=new THREE.TorusGeometry(ROD.r+0.6,0.7,8,28,1.6*PI); tg.rotateZ(-0.8*PI+PI); tg.rotateY(PI/2);
+    const t=new THREE.Mesh(tg,MAT.white); t.position.set(x,ROD.y,ROD.z); g.add(t);
+  }
+  addPart('holders', g, {name:'磁棒支架 ×2', des:'—', cat:'tune', stage:'ant', off:[0,8,-18], delay:.16,
+    spec:'白色尼龙卡扣', desc:'插在电路板上的两只白色卡扣，把磁棒托离电路板，避免线圈贴近金属元件和铜箔而降低 Q 值。', rel:['rod']});
+})();
+
+/* ---------- detector shield (rear side) ---------- */
+const SHD={x0:3,x1:22,y0:-29,y1:-12,h:11};
+(function shield(){
+  const g=new THREE.Group(); const w=SHD.x1-SHD.x0, d=SHD.y1-SHD.y0, cx=(SHD.x0+SHD.x1)/2, cy=(SHD.y0+SHD.y1)/2, z=PCB.back;
+  g.add(box(w,d,0.3,MAT.tin,cx,cy,z-SHD.h));
+  g.add(box(w,0.3,SHD.h,MAT.tin,cx,SHD.y0,z-SHD.h/2)); g.add(box(w,0.3,SHD.h,MAT.tin,cx,SHD.y1,z-SHD.h/2));
+  g.add(box(0.3,d,SHD.h,MAT.tin,SHD.x0,cy,z-SHD.h/2)); g.add(box(0.3,d,SHD.h,MAT.tin,SHD.x1,cy,z-SHD.h/2));
+  for(let i=0;i<3;i++) g.add(box(w-6,0.8,0.25,MAT.tin,cx,cy-4+i*4,z-SHD.h-0.25));
+  addPart('shield', g, {name:'检波屏蔽罩', des:'—', cat:'det', stage:'det', off:[0,0,-40], delay:.12, label:'屏蔽罩',
+    spec:'镀锡铁皮 · 焊接接地', desc:'罩住检波与 AGC 电路的金属盒，焊接到电路板地线。检波二极管会产生丰富的中频谐波，如果辐射回磁棒天线或前级，就会引起<b>啸叫与自激</b>；屏蔽罩把这些干扰关在里面。', rel:['d1','c7','r6','c8']});
+})();
+
+/* ================= PCB components ================= */
+const BAND = ['#161616','#6b3a1e','#c3272b','#e8762d','#f0c02c','#2f8f46','#2a5bb8','#7b3fa3','#8a8a8a','#f1f1f1'];
+function resBands(v){ // 4-band
+  let e=0; while(v>=100){ v/=10; e++; } while(v<10 && e>-2){ v*=10; e--; }
+  const d=Math.round(v); const d1=Math.floor(d/10), d2=d%10;
+  return [BAND[d1],BAND[d2], e>=0?BAND[e]:'#c9a13b', '#c9a13b'];
+}
+const bandMats={};
+const bandMat = c => bandMats[c] || (bandMats[c]=std(c,{roughness:.45, metalness: c==='#c9a13b'?.8:0}));
+function leadV(g,x,y,z0,z1){ g.add(cylZ(0.28,z0-z1,MAT.lead,x,y,(z0+z1)/2,6)); }
+function B_res(val, opt={}){
+  const g=new THREE.Group(); const bands=resBands(val);
+  if(!opt.lie){
+    g.add(cylZ(1.15,5.8,MAT.resBody,-1.27,0,5.2,20)); g.add(sph(1.3,MAT.resBody,-1.27,0,2.3,1,1,.7)); g.add(sph(1.3,MAT.resBody,-1.27,0,8.1,1,1,.7));
+    bands.forEach((c,i)=>g.add(cylZ(1.2,0.45,bandMat(c),-1.27,0,7.5-i*0.9-(i===3?1.4:0),20)));
+    leadV(g,-1.27,0,2,-2.5);
+    g.add(tube([[-1.27,0,8.6],[-1.0,0,10.2],[0.3,0,10.6],[1.27,0,9.4],[1.27,0,4],[1.27,0,-2.5]],0.28,MAT.lead,30,5));
+    return {g, pins:[['1',-1.27,0],['2',1.27,0]], h:10.8};
+  }
+  const bz=2.0;
+  g.add(cylX(1.15,5.0,MAT.resBody,0,0,bz,20));
+  g.add(sph(1.32,MAT.resBody,-2.6,0,bz,.7,1,1)); g.add(sph(1.32,MAT.resBody,2.6,0,bz,.7,1,1));
+  const bx=[-2.35,-1.45,-0.55,1.9];
+  bands.forEach((c,i)=>g.add(cylX(i===0?1.36:1.2,0.45,bandMat(c),bx[i],0,bz,20)));
+  for(const s of [-1,1]){ g.add(cylX(0.28,1.9,MAT.lead,s*4.05,0,bz,6)); leadV(g,s*5,0,bz,-2.5); g.add(sph(0.28,MAT.lead,s*5,0,bz)); }
+  return {g, pins:[['1',-5,0],['2',5,0]], h:3.3};
+}
+function B_disc(code, color){
+  const g=new THREE.Group(); const m = color==='blue'?MAT.capBlue:(color==='yellow'?MAT.capYellow:MAT.capOrange);
+  const d=new THREE.Mesh(new THREE.CylinderGeometry(2.7,2.7,1.5,28),m); d.position.z=4.6; g.add(d);
+  g.add(sph(2.72,m,0,0,4.6,1,.3,1));
+  g.add(sph(0.9,m,-1.5,0,2.2,1,.8,1.2)); g.add(sph(0.9,m,1.5,0,2.2,1,.8,1.2));
+  const t=decal(4.2,2.6,textTex(code,{w:128,h:80,size:52,color:'#1b1b1b',weight:700})); t.rotation.x=PI/2; t.position.set(0,-1.02,4.6); g.add(t);
+  const t2=t.clone(); t2.rotation.x=-PI/2; t2.rotation.z=PI; t2.position.y=1.02; g.add(t2);
+  for(const s of [-1,1]) g.add(tube([[s*1.4,0,2.8],[s*2.1,0,1.4],[s*2.5,0,0.5],[s*2.5,0,-2.5]],0.26,MAT.lead,12,5));
+  return {g, pins:[['1',-2.5,0],['2',2.5,0]], h:7.5};
+}
+function B_poly(code){
+  const g=new THREE.Group();
+  g.add(box(7,3,5.5,MAT.polyGreen,0,0,3.4));
+  const t=decal(6.2,4,textTex(['2A'+code+'J'],{w:160,h:100,size:40,color:'#e8e3d0',weight:700})); t.rotation.x=PI/2; t.position.set(0,-1.52,3.5); g.add(t);
+  for(const s of [-1,1]) leadV(g,s*2.5,0,1,-2.5);
+  return {g, pins:[['1',-2.5,0],['2',2.5,0]], h:6.2};
+}
+const elecSleeve={blue:std(0x1f4a9a,{roughness:.5, envMapIntensity:.5}), black:std(0x1c1c20,{roughness:.45, envMapIntensity:.6})};
+const elecStripe=std(0xc9ccd4,{roughness:.4});
+function B_elec(r,h,label,color='blue'){
+  const g=new THREE.Group(); const z0=0.8;
+  g.add(cylZ(r,h,elecSleeve[color],0,0,z0+h/2,32));
+  const s=new THREE.Mesh(new THREE.CylinderGeometry(r+0.02,r+0.02,h-0.6,16,1,true,-0.5,1.0),elecStripe); s.rotation.x=PI/2; s.position.z=z0+h/2; s.rotation.y=0; g.add(s);
+  g.add(cylZ(r*0.9,0.3,MAT.steel,0,0,z0+h+0.1,32));
+  g.add(box(r*1.2,0.18,0.1,MAT.darkGrey,0,0,z0+h+0.27)); g.add(box(0.18,r*1.2,0.1,MAT.darkGrey,0,0,z0+h+0.27));
+  g.add(cylZ(r-0.3,0.6,MAT.rubber,0,0,z0-0.2,24));
+  const t=decal(r*1.5,h*0.62,textTex(label.split('|'),{w:128,h:200,size:34,color:'#f0f0f0',weight:700})); t.rotation.x=PI/2; t.position.set(0,-r-0.03,z0+h/2); g.add(t);
+  const p = r>3?1.75:1.25;
+  leadV(g,-p,0,z0,-2.5); leadV(g,p,0,z0,-2.5);
+  return {g, pins:[['+',-p,0],['-',p,0]], h:h+z0+0.3};
+}
+function B_to92(label){
+  const g=new THREE.Group();
+  const s=new THREE.Shape(); s.moveTo(-2.3,-0.9); s.lineTo(2.3,-0.9); s.absarc(0,-0.9,2.3,0,PI,false);
+  const b=extrude(s,4.8,MAT.blackGloss,3.0); g.add(b);
+  const t=decal(4.2,4.2,textTex(label.split('|'),{w:160,h:160,size:38,color:'#cfcfcf',weight:600})); t.rotation.x=PI/2; t.position.set(0,-0.93,5.4); g.add(t);
+  [-1.27,0,1.27].forEach((xb,i)=>{ const xp=[-2.54,0,2.54][i]; g.add(tube([[xb,0.2,3.1],[xb,0.2,2.2],[xp,0.2,1.0],[xp,0,-2.5]],0.22,MAT.lead,12,4)); });
+  return {g, pins:[['E',-2.54,0],['B',0,0],['C',2.54,0]], h:7.9};
+}
+const coreMats={red:std(0xd12a1f,{roughness:.5}), yellow:std(0xe8c22a,{roughness:.5}), white:std(0xf0efe8,{roughness:.5}), black:std(0x1a1a1a,{roughness:.5}), green:std(0x2e8a4a,{roughness:.5})};
+function B_can(core){
+  const g=new THREE.Group(); const S=8;
+  g.add(box(S,S,1.2,MAT.white,0,0,0.6));
+  g.add(box(S,S,0.5,MAT.nickel,0,0,9.35));
+  for(const [x,y,w,d] of [[0,S/2-0.15,S,0.3],[0,-S/2+0.15,S,0.3],[S/2-0.15,0,0.3,S],[-S/2+0.15,0,0.3,S]]) g.add(box(w,d,8.4,MAT.nickel,x,y,5.3));
+  g.add(cylZ(2.25,0.05,MAT.black,0,0,9.62,24));
+  g.add(cylZ(1.9,1.2,coreMats[core],0,0,9.3,24));
+  g.add(box(3.2,0.55,0.3,MAT.black,0,0,9.9));
+  for(const s of [-1,1]) g.add(box(1.4,0.3,3.5,MAT.nickel,s*(S/2-0.4),0,-0.6));
+  const pins=[['1',-2.5,-3],['2',0,-3],['3',2.5,-3],['4',-2.5,3],['5',2.5,3]];
+  for(const [,x,y] of pins) leadV(g,x,y,0.2,-2.5);
+  return {g, pins, h:10};
+}
+function B_cf(){
+  const g=new THREE.Group();
+  g.add(box(7,3.2,6,std(0x2f63c7,{roughness:.45}),0,0,4));
+  const t=decal(6,3.4,textTex(['455','LT455HW'],{w:180,h:100,size:30,color:'#f2f2f2',weight:700})); t.rotation.x=PI/2; t.position.set(0,-1.62,4.2); g.add(t);
+  for(const x of [-2.5,0,2.5]) leadV(g,x,0,1,-2.5);
+  return {g, pins:[['1',-2.5,0],['2',0,0],['3',2.5,0]], h:7};
+}
+function B_diode(kind, opt={}){
+  const g=new THREE.Group(); const bz=1.5;
+  const m = kind==='1N60'?MAT.glassClr:MAT.glassRed;
+  if(opt.stand){
+    g.add(cylZ(0.95,3.8,m,-1.27,0,4.6,20)); g.add(sph(0.95,m,-1.27,0,2.7,1,1,.4)); g.add(sph(0.95,m,-1.27,0,6.5,1,1,.4));
+    g.add(cylZ(0.98,0.55,MAT.black,-1.27,0,5.9,20));
+    leadV(g,-1.27,0,2.4,-2.5);
+    g.add(tube([[-1.27,0,6.8],[-1.0,0,8.2],[0.3,0,8.6],[1.27,0,7.6],[1.27,0,3],[1.27,0,-2.5]],0.24,MAT.lead,30,5));
+    return {g, pins:[['A',-1.27,0],['K',1.27,0]], h:8.8};
+  }
+  g.add(cylX(0.95,3.8,m,0,0,bz,20)); g.add(sph(0.95,m,-1.9,0,bz,.4,1,1)); g.add(sph(0.95,m,1.9,0,bz,.4,1,1));
+  g.add(cylX(0.98,0.55,MAT.black,1.35,0,bz,20));
+  if(kind==='1N60'){ g.add(cylX(0.25,2.8,MAT.steel,0,0,bz,6)); g.add(cylX(0.5,0.6,std(0x444444,{metalness:.6}),0.6,0,bz,10)); }
+  for(const s of [-1,1]){ g.add(cylX(0.24,1.8,MAT.lead,s*2.9,0,bz,6)); leadV(g,s*3.8,0,bz,-2.5); }
+  return {g, pins:[['A',-3.8,0],['K',3.8,0]], h:2.5};
+}
+function B_dip8(label){
+  const g=new THREE.Group(); const L=9.6, W=6.3, H=3.3, z0=0.7;
+  g.add(box(L,W,H,MAT.black,0,0,z0+H/2));
+  g.add(cylZ(0.9,0.2,MAT.darkGrey,-L/2+1.3,-W/2+1.2,z0+H+0.02,16));
+  const n=new THREE.Mesh(new THREE.CylinderGeometry(1,1,0.4,16,1,false,0,PI),MAT.darkGrey); n.rotation.x=PI/2; n.rotation.y=PI/2; n.position.set(-L/2,0,z0+H-0.15); g.add(n);
+  const t=decal(7.4,4.2,textTex(['TA7368P','8 JAPAN'],{w:240,h:136,size:40,color:'#d9d9d9',weight:600})); t.position.set(0.4,0.3,z0+H+0.03); g.add(t);
+  const pins=[];
+  for(let i=0;i<4;i++){ const x=-3.81+i*2.54;
+    pins.push([String(i+1),x,-3.81]); pins.push([String(8-i),x,3.81]);
+    for(const s of [-1,1]){ g.add(box(0.9,1.0,0.25,MAT.tin,x,s*(W/2+0.4),z0+1.4)); g.add(box(0.5,0.25,4,MAT.tin,x,s*3.81,z0-0.6)); }
+  }
+  return {g, pins, h:z0+H+0.1};
+}
+function B_sip(label){
+  const g=new THREE.Group(); const L=22.5, T=3.2, H=6.2, z0=1.6;
+  g.add(box(L,T,H,MAT.black,0,0,z0+H/2));
+  g.add(cylZ(0.6,0.2,MAT.darkGrey,-L/2+1.4,-T/2-0.01,z0+H-1.2,12)).rotation.x=0;
+  const d=decal(0.9,0.9,textTex('●',{w:32,h:32,size:28,color:'#555'})); d.rotation.x=PI/2; d.position.set(-L/2+1.6,-T/2-0.02,z0+H-1.3); g.add(d);
+  const t=decal(15,4.4,textTex(['TA7368P','9L  JAPAN'],{w:340,h:100,size:36,color:'#d9d9d9',weight:600})); t.rotation.x=PI/2; t.position.set(1,-T/2-0.02,z0+H/2); g.add(t);
+  const pins=[];
+  for(let i=0;i<9;i++){ const x=-10.16+i*2.54; pins.push([String(i+1),x,0]); g.add(box(0.5,0.28,z0+2.5,MAT.tin,x,0,(z0-2.5)/2)); g.add(box(0.9,0.28,1.2,MAT.tin,x,0,z0-0.2)); }
+  return {g, pins, h:z0+H+0.1};
+}
+function B_tp(){
+  const g=new THREE.Group();
+  g.add(sph(1.1,MAT.tin,0,0,0.1,1.3,.8,.5));
+  return {g, pins:[['a',-1.1,0],['b',1.1,0]], h:0.8};
+}
+function B_pot(){
+  // thumb-wheel potentiometer mounted at the PCB edge: the big knurled wheel turns in a PCB cut-out
+  // and its rim rises into the recessed slot of the right cover
+  const g=new THREE.Group(); const wx=VOL.x-46, wz=VOL.z-PCB.front;
+  g.add(box(6.2,12,8.6,MAT.darkGrey,3.3,0,2.7));
+  g.add(box(2.6,8,4.6,MAT.nickel,6.9,0,2.2));
+  g.add(cylX(1.4,7,MAT.steel,wx+3.6,0,wz,16));
+  const w=knurlDisc(VOL.r,VOL.t,72,0.45,MAT.white); w.rotation.y=PI/2; w.position.set(wx-VOL.t/2,0,wz); g.add(w);
+  const hub=cylX(3.2,VOL.t+0.5,MAT.white,wx,0,wz,32); g.add(hub);
+  const dot=cylX(0.9,VOL.t+0.7,std(0xbdb8ad,{roughness:.6}),wx,0,wz+VOL.r*0.62,16); g.add(dot);
+  g.userData.wheel=[w,hub,dot];
+  const pins=[['1',1,-4.5],['2',3.5,-4.5],['3',6,-4.5],['S1',1,4.5],['S2',6,4.5]];
+  for(const [,x,y] of pins) leadV(g,x,y,0.3,-2.5);
+  return {g, pins, h:8.6};
+}
+function B_jack(){
+  const g=new THREE.Group();
+  g.add(box(11,6.2,5,MAT.black,0,0,2.5));
+  g.add(cylX(3,1.6,MAT.chrome,6.2,0,2.6,24)); g.add(cylX(1.8,1.7,MAT.black,6.3,0,2.6,20));
+  const pins=[['1',-3.5,-2.4],['2',0,2.4],['3',3.5,-2.4]];
+  for(const [,x,y] of pins) leadV(g,x,y,0.2,-2.5);
+  return {g, pins, h:5.4};
+}
+function B_vc(){
+  const g=new THREE.Group();
+  g.add(box(20,20,1.2,MAT.vcBase,0,0,0.6));
+  const rotor=new THREE.Group(); g.add(rotor); g.userData.rotor=rotor;
+  const stator=new THREE.Group(); g.add(stator);
+  const plate=(r,z,mat,grp,t0)=>{ const m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,0.18,40,1,false,t0,PI),mat); m.rotation.x=PI/2; m.position.z=z; grp.add(m); };
+  const films=std(0xf2e9b8,{roughness:.3, transparent:true, opacity:.55});
+  for(let i=0;i<7;i++){ plate(8.4,1.8+i*0.52,MAT.nickel,rotor,0); plate(8.4,2.06+i*0.52,MAT.copper,stator,PI); }
+  for(let i=0;i<4;i++){ plate(8.4,6.1+i*0.52,MAT.nickel,rotor,0); plate(8.4,6.36+i*0.52,MAT.copper,stator,PI); }
+  g.add(box(19.6,19.6,0.2,films,0,0,5.6));
+  const shell=box(20,20,8.6,MAT.vcBody,0,0,5.5); g.add(shell);
+  g.add(cylZ(1.3,9,MAT.steel,0,0,5.5,16));
+  g.add(cylZ(3.2,1.6,MAT.vcBase,0,0,10.6,24));
+  g.add(cylZ(1.6,4.4,MAT.white,0,0,-2.2,16));
+  for(const [x,y] of [[-6.5,6.5],[6.5,6.5]]){ g.add(cylZ(1.4,0.8,MAT.vcBase,x,y,10.2,16)); g.add(box(1.8,0.35,0.3,MAT.black,x,y,10.65)); }
+  const pins=[['A',-5,-10.5],['G',0,-10.5],['O',5,-10.5],['G2',0,10.5]];
+  for(const [,x,y] of pins){ g.add(box(1.2,0.9,2,MAT.tin,x,y+(y<0?0.3:-0.3),1)); leadV(g,x,y,0.2,-2.5); }
+  g.scale.setScalar(0.9);
+  return {g, pins:pins.map(([n,x,y])=>[n,x*0.9,y*0.9]), h:12};
+}
+
+/* ---- component table (case coords on PCB) ---- */
+const S_ = {ant:'ant', tune:'tune', mix:'mix', cf:'cf', if1:'if1', if2:'if2', det:'det', vol:'vol', amp:'amp', out:'out', power:'power', mech:'mech', board:'board'};
+const COMP = [
+ // mixer / local oscillator
+ {id:'vc', b:()=>B_vc(), x:41,y:13, name:'双联可变电容', des:'VC', stage:'tune', cat:'tune', label:'双联电容',
+  spec:'密封薄膜介质双联（白色透明方块）· 天线联 + 振荡联 · 带两只微调电容',
+  desc:'调谐的核心。同一根转轴上装有两组动片：<b>天线联</b>与磁棒主线圈组成输入谐振回路，决定“收哪个台”；<b>振荡联</b>与振荡线圈 T1 组成本机振荡回路，决定本振频率。两联同步转动，使本振频率始终比电台频率<b>高 455 kHz</b>（统调）。顶部两只小螺丝是<b>微调电容</b>，用于高端统调。它装在电路板背面，转轴穿过电路板，正面装着调谐拨盘；拨动拨盘即可看到内部动片旋入/旋出定片。'},
+ {id:'q1', b:()=>B_to92('S9018|H'), x:6,y:21, name:'变频管', des:'Q1', stage:'mix', cat:'mix',
+  spec:'S9018 NPN 高频管 · fT≈1.1 GHz · Ic 约 0.3–0.6 mA',
+  desc:'一管两用的<b>自激式变频器</b>：它既和 T1、振荡联一起产生本机振荡（本振），又把天线送来的电台信号与本振信号在管内<b>混频</b>。混频产生“和频”与“差频”，其中差频 = 本振 − 电台 = <b>455 kHz 中频</b>，由后面的陶瓷滤波器挑出。无论收哪个台，后级都只需放大固定的 455 kHz，这就是“超外差”的精髓。'},
+ {id:'t1', b:()=>B_can('red'), x:27,y:17, name:'振荡线圈（红磁帽）', des:'T1', stage:'mix', cat:'mix',
+  spec:'中波本振线圈 · 红色磁帽 · 可调电感',
+  desc:'与双联的振荡联构成<b>本机振荡</b>的 LC 回路，并把 Q1 集电极的信号正反馈回发射极以维持振荡。本振频率约 985–2075 kHz。用无感螺丝刀旋动红色磁帽可改变电感量，用于<b>低端统调</b>（对准刻度低端）。'},
+ {id:'r1', b:()=>B_res(100e3), x:6,y:16.5, name:'偏置电阻', des:'R1', stage:'mix', cat:'mix', spec:'100 kΩ 碳膜电阻 1/8 W', desc:'从稳压电源给变频管 Q1 基极提供偏置电流，决定 Q1 的静态工作点。Q1 电流过大本振过强、噪声增大，过小则可能停振，所以装机后要在 LC1 断点处测电流。'},
+ {id:'r2', b:()=>B_res(2e3), x:11,y:21, name:'发射极电阻', des:'R2', stage:'mix', cat:'mix', spec:'2 kΩ 碳膜电阻', desc:'串在 Q1 发射极，产生直流负反馈，稳定变频管的工作点，使其不随温度和管子参数漂移。'},
+ {id:'c1', b:()=>B_disc('223'), x:0.5,y:21, name:'旁路电容', des:'C1', stage:'mix', cat:'mix', spec:'0.022 μF 瓷片电容（223）', desc:'把磁棒次级线圈“冷端”对地交流短路，使高频信号能完整加到 Q1 基极-发射极之间，同时不影响直流偏置。'},
+ {id:'c2', b:()=>B_disc('103'), x:16,y:21, name:'振荡耦合电容', des:'C2', stage:'mix', cat:'mix', spec:'0.01 μF 瓷片电容（103）', desc:'把振荡线圈 T1 的反馈信号耦合到 Q1 发射极，形成正反馈使本振起振；同时隔断直流。'},
+ {id:'lc1', b:()=>B_tp(), x:21,y:21, name:'电流测试断点 A', des:'LC1', stage:'mix', cat:'mix', spec:'开口焊盘 · 测 Q1 集电极电流后焊通',
+  desc:'电路板上故意断开的一对焊盘。装机调试时先不焊通，把万用表电流档串接在两焊盘间测量 Q1 集电极电流（推荐 0.3–0.6 mA），调整合适后再用焊锡把断点连通。'},
+ {id:'cf', b:()=>B_cf(), x:27,y:6.5, name:'455 kHz 陶瓷滤波器', des:'CF', stage:'cf', cat:'ifa',
+  spec:'三端陶瓷滤波器 · 中心 455 kHz · 通带约 ±5 kHz',
+  desc:'利用压电陶瓷片的机械谐振，只让 <b>455 kHz</b> 附近很窄频带的信号通过，把混频产生的其它频率成分（和频、本振泄漏、邻近电台）挡在门外。它取代了传统的一只中周，显著提高了<b>选择性</b>，使邻台不易串音，而且无需调试。'},
+ // IF
+ {id:'q2', b:()=>B_to92('S9018|H'), x:19,y:6, name:'第一中放管', des:'Q2', stage:'if1', cat:'ifa', spec:'S9018 NPN · Ic 约 0.3–0.6 mA · 受 AGC 控制',
+  desc:'放大 455 kHz 中频信号。它的基极偏置由检波后的 <b>AGC 电压</b>控制：信号越强，AGC 使 Q2 电流越小、增益越低，从而让强台和弱台的音量趋于一致，防止强台失真。'},
+ {id:'r3', b:()=>B_res(150e3), x:14,y:5, name:'AGC 偏置电阻', des:'R3', stage:'if1', cat:'ifa', spec:'150 kΩ', desc:'把检波后得到的 AGC 直流电压送到第一中放管 Q2 的基极，建立 Q2 的偏置并实现自动增益控制。'},
+ {id:'lc2', b:()=>B_tp(), x:19,y:1.5, name:'电流测试断点 B', des:'LC2', stage:'if1', cat:'ifa', spec:'开口焊盘', desc:'用于测量 Q2 集电极电流（推荐 0.3–0.6 mA），测后焊通。'},
+ {id:'t2', b:()=>B_can('yellow'), x:27,y:-5, name:'第一中周（黄磁帽）', des:'T2', stage:'if1', cat:'ifa',
+  spec:'455 kHz 中频变压器 · 黄色磁帽 · 内含谐振电容',
+  desc:'Q2 的集电极负载，本身是一个调谐在 455 kHz 的 LC 谐振回路，兼作<b>选频</b>与<b>级间耦合</b>：初级接 Q2 集电极，次级把信号送到 Q3 基极。调试时用无感螺丝刀旋磁帽，把中频调到输出最大、声音最响（“峰值”）。'},
+ {id:'r4', b:()=>B_res(100e3), x:32,y:-2.5, name:'阻尼电阻', des:'R4', stage:'if1', cat:'ifa', spec:'100 kΩ 立式 · 与中周并联（可选焊）',
+  desc:'并联在中周上降低回路 Q 值、展宽中频通带。它能抑制中放级<b>自激啸叫</b>、改善音质；若整机稳定、希望更高灵敏度，可按说明书选择不焊。'},
+ {id:'q3', b:()=>B_to92('S9018|H'), x:18,y:-6, name:'第二中放管', des:'Q3', stage:'if2', cat:'ifa', spec:'S9018 NPN · Ic 约 0.5–1.0 mA',
+  desc:'对中频信号作第二次放大，把信号提升到足以推动检波二极管的幅度（约几百毫伏）。它的工作电流比前两管略大，以获得足够的输出摆幅。'},
+ {id:'r5', b:()=>B_res(62e3), x:13,y:-6, name:'偏置电阻', des:'R5', stage:'if2', cat:'ifa', spec:'62 kΩ', desc:'为第二中放管 Q3 提供固定偏置，确定其静态电流。'},
+ {id:'c4', b:()=>B_disc('103'), x:7,y:-3, name:'中放旁路电容', des:'C4', stage:'if2', cat:'ifa', spec:'0.01 μF（103）', desc:'把 Q3 发射极/偏置点对地交流旁路，避免中频信号在电阻上产生负反馈而降低增益。'},
+ {id:'c5', b:()=>B_disc('103'), x:7,y:-8, name:'退耦电容', des:'C5', stage:'if2', cat:'ifa', spec:'0.01 μF（103）', desc:'中放级电源退耦，防止中频信号经电源线窜到前级引起寄生反馈。'},
+ {id:'lc3', b:()=>B_tp(), x:20,y:-10.5, name:'电流测试断点 C', des:'LC3', stage:'if2', cat:'ifa', spec:'开口焊盘', desc:'用于测量 Q3 集电极电流（推荐 0.5–1.0 mA），测后焊通。'},
+ {id:'t3', b:()=>B_can('black'), x:27,y:-17, name:'第二中周（黑磁帽）', des:'T3', stage:'if2', cat:'ifa',
+  spec:'455 kHz 检波中周 · 黑色磁帽', desc:'Q3 的集电极负载和最后一级中频选频回路，次级把放大后的中频信号送到检波二极管。与 T2 一样需要微调磁帽到峰值。'},
+ // detector
+ {id:'d1', b:()=>B_diode('1N60'), x:14,y:-17, name:'检波二极管', des:'D1', stage:'det', cat:'det',
+  spec:'1N60 锗点接触二极管 · 正向压降约 0.2–0.3 V',
+  desc:'把调幅中频信号<b>整流</b>，取出其包络——也就是电台播出的<b>音频</b>。选用锗管是因为它的导通压降比硅管低得多，微弱信号也能检出，失真小。检波得到的直流分量正比于信号强弱，同时被用作 AGC 控制电压。'},
+ {id:'c7', b:()=>B_disc('223','blue'), x:6,y:-15, name:'检波滤波电容', des:'C7', stage:'det', cat:'det', spec:'0.022 μF', desc:'滤除检波后残留的 455 kHz 中频载波，只留下音频成分送往音量电位器。'},
+ {id:'r6', b:()=>B_res(10e3), x:19,y:-22, name:'AGC 滤波电阻', des:'R6', stage:'det', cat:'det', spec:'10 kΩ', desc:'与 C8 组成低通滤波器，把检波输出中的音频起伏滤掉，只留下反映信号强弱的<b>缓变直流</b>，作为 AGC 电压送回 Q2。'},
+ {id:'c8', b:()=>B_elec(2.5,7,'10μF|16V','black'), x:13,y:-25, name:'AGC 滤波电容', des:'C8', stage:'det', cat:'det', spec:'10 μF / 16 V 电解电容', desc:'AGC 时间常数电容：使 AGC 电压变化足够缓慢，只跟随电台强弱变化，而不跟随声音节奏起伏，避免“抽吸”现象。'},
+ // audio
+ {id:'w', side:'front', b:()=>B_pot(), x:46,y:VOL.y, name:'音量电位器（带开关）', des:'W', stage:'vol', cat:'audio', label:'音量电位器',
+  spec:'5 kΩ 拨轮式带开关电位器',
+  desc:'检波得到的音频信号加在电位器两端，滑动触点取出其中一部分送给功放——拨轮转得越多，取出的信号越大、音量越大。拨轮往“关”的方向拨到底，会断开电位器上的<b>电源开关</b>，切断整机电源。拨轮装在电路板正面、轴线横放，它的滚花边从前面板右侧的<b>竖条窗</b>露出，用拇指上下拨动。'},
+ {id:'c9', b:()=>B_elec(2.5,7,'10μF|16V'), x:34.5,y:-29, name:'音频耦合电容', des:'C9', stage:'vol', cat:'audio', spec:'10 μF 电解', desc:'把电位器取出的音频信号送入 TA7368 的输入端，同时隔断直流，避免影响功放的内部偏置。'},
+ {id:'ic', b:()=>B_sip('TA7368P'), x:-15.5,y:19.5, name:'音频功放集成电路', des:'IC', stage:'amp', cat:'audio', label:'TA7368 功放',
+  spec:'TOSHIBA TA7368P · 单列直插（SIP-9）· 3 V 供电输出约 120 mW',
+  desc:'低压音频功率放大器。把音量电位器送来的约几十毫伏音频信号<b>放大几十倍</b>，并提供足够电流推动 8 Ω 扬声器。它专为 2–3 V 电池供电设计，外围元件少、静态电流小。用集成功放取代了传统的推挽输出变压器电路，装配简单、音质干净。'},
+ {id:'c11', b:()=>B_elec(3,9,'100μF|10V'), x:-39,y:14, name:'功放退耦电容', des:'C11', stage:'amp', cat:'audio', spec:'100 μF 电解', desc:'为 TA7368 的内部偏置/反馈端提供交流旁路，决定功放的增益与低频响应，并滤除电源纹波。'},
+ {id:'c10', b:()=>B_elec(4,11,'220μF|10V'), x:-40,y:4, name:'输出耦合电容', des:'C10', stage:'amp', cat:'audio', 
+  spec:'220 μF 电解', desc:'功放输出与扬声器之间的“隔直通交”电容：让音频电流流过扬声器，而挡住功放输出端的直流电压。容量越大，低音越饱满。'},
+ {id:'c12', b:()=>B_disc('104','yellow'), x:-31,y:20, name:'防振电容', des:'C12', stage:'amp', cat:'audio', spec:'0.1 μF（104）', desc:'与 R8 串联组成“茹贝尔网络”，接在功放输出端对地，抵消扬声器音圈电感在高频时的影响，防止功放<b>高频自激</b>。'},
+ {id:'r8', b:()=>B_res(4.7), x:-35,y:21.5, name:'防振电阻', des:'R8', stage:'amp', cat:'audio', spec:'4.7 Ω', desc:'与 C12 组成输出端的 RC 补偿网络，稳定功放。'},
+ {id:'jack', b:()=>B_jack(), x:-46.5,y:21, name:'耳机插孔', des:'J', stage:'out', cat:'audio', 
+  spec:'3.5 mm 带切换触点', desc:'插入耳机时，插孔内部的<b>切换簧片</b>被顶开，扬声器被断开，音频改送耳机；拔出耳机后簧片复位，扬声器恢复发声。'},
+ // power
+ {id:'d2', b:()=>B_diode('1N4148',{stand:true}), x:-51,y:-1, name:'稳压二极管组 ①', des:'D2', stage:'power', cat:'power', spec:'1N4148 硅开关二极管', desc:'三只 1N4148（D2–D4）正向串联，利用每只约 0.6 V 的正向压降得到约 <b>1.7–1.8 V</b> 的稳定电压，给三只高频管供电。电池从 3 V 用到 2 V 左右时，高频部分工作点基本不变，收音效果稳定。'},
+ {id:'d3', b:()=>B_diode('1N4148',{stand:true}), x:-48,y:-1, name:'稳压二极管组 ②', des:'D3', stage:'power', cat:'power', spec:'1N4148', desc:'与 D2、D4 串联构成简易稳压。'},
+ {id:'d4', b:()=>B_diode('1N4148',{stand:true}), x:-45,y:-1, name:'稳压二极管组 ③', des:'D4', stage:'power', cat:'power', spec:'1N4148', desc:'与 D2、D3 串联构成简易稳压。'},
+ {id:'r7', b:()=>B_res(510), x:-33,y:1, name:'稳压限流电阻', des:'R7', stage:'power', cat:'power', spec:'510 Ω', desc:'串在 3 V 电源与稳压二极管之间，限制二极管电流，并与二极管一起组成稳压电路。'},
+ {id:'c13', b:()=>B_elec(3,9,'100μF|10V'), x:-31,y:9, name:'稳压滤波电容', des:'C13', stage:'power', cat:'power', spec:'100 μF 电解', desc:'并在 1.8 V 稳压输出上，进一步滤除噪声与纹波，给高频/中频各级提供干净的电源。'},
+ {id:'c6', b:()=>B_poly('223'), x:-1,y:10, name:'高频退耦电容', des:'C6', stage:'power', cat:'power', spec:'0.022 μF 涤纶电容', desc:'对稳压电源作高频旁路，防止各级高频信号通过公共电源线相互耦合。'},
+ {id:'c14', b:()=>B_elec(4,11,'220μF|10V'), x:-48,y:11, name:'电源滤波电容', des:'C14', stage:'power', cat:'power', 
+  spec:'220 μF 电解', desc:'并联在 3 V 电源两端的“蓄水池”。功放在大音量时电流起伏很大，电池内阻会使电压跟着波动；这只大电容就近供电，防止电压波动引起<b>低频自激（汽船声）</b>，电池用旧时尤其重要。'},
+];
+
+/* ---- place components ---- */
+const PADS = {}; // name -> [x,y]
+const PAD_LIST = [];
+function regPad(name,x,y,gnd){ PADS[name]=[x,y]; PAD_LIST.push({name,x,y}); }
+for(const c of COMP){
+  const r=c.b(); c.h=r.h; c.pins=r.pins; const g=r.g;
+  const a=(c.rot||0)*PI/180 + (c.id==='jack'?PI:0); const front = c.side==='front';
+  if(front){ g.position.set(c.x,c.y,PCB.front); g.rotation.set(0,0,a); }
+  else { g.position.set(c.x,c.y,PCB.back); g.rotation.set(PI,0,a); }
+  for(const [pn,px,py] of r.pins){ const X=px*Math.cos(a)-py*Math.sin(a), Y=px*Math.sin(a)+py*Math.cos(a); regPad(c.id+'.'+pn, c.x+X, front? c.y+Y : c.y-Y); }
+  if(c.id==='vc') c.rotor=g.userData.rotor;
+  if(c.id==='w') c.wheel=g.userData.wheel;
+  const d = .15 + ((PCB.x1-c.x)/(PCB.x1-PCB.x0))*.12;
+  const off = front? [0,0,20] : [0,0,-4-(10+c.h*0.7)];
+  addPart(c.id, g, {name:c.name, des:c.des, cat:c.cat, stage:c.stage, spec:c.spec, desc:c.desc, off, delay:d, label:c.label, comp:c, side: front?'front':'back'});
+}
+const EXTRA_PADS = {A1:[-40.5,24.2],A2:[-18.5,24.2],A3:[20,25],A4:[42,25],SPP:[11,12],SPN:[11,15],BATP:[-51,-12.5],BATN:[-51,-26.5]};
+for(const k in EXTRA_PADS) regPad(k,...EXTRA_PADS[k]);
+
+const GND = new Set(['vc.G2','A2','c1.2','r2.2','vc.G','cf.2','q2.E','c4.2','c5.2','c7.2','c8.-','w.1','ic.3','ic.4','r8.2','jack.3','SPN','BATN','d4.K','c13.-','c14.-','c6.2','c11.-','c9.-x','t1.1x']);
+const NETS = [
+ ['A1','vc.A'],['A3','q1.B'],['r1.2','q1.B'],['A4','c1.1'],
+ ['q1.E','c2.1'],['r2.1','q1.E'],['c2.2','t1.1'],['t1.3','vc.O'],['q1.C','lc1.a'],['lc1.b','t1.4'],['t1.5','cf.1'],
+ ['cf.3','q2.B'],['q2.B','r3.1'],['r3.2','c8.+'],
+ ['q2.C','lc2.a'],['lc2.b','t2.4'],['t2.5','r4.2'],['r4.1','t2.4'],['t2.1','q3.B'],['q3.B','r5.1'],
+ ['q3.E','c4.1'],['q3.C','lc3.a'],['lc3.b','t3.4'],['t3.1','d1.A'],
+ ['d1.K','c7.1'],['d1.K','r6.1'],['c7.1','w.3'],['r6.2','c8.+'],
+ ['w.2','c9.+'],['c9.-','ic.2'],['ic.5','c10.+'],['ic.6','c12.1'],['c12.2','r8.1'],['c10.-','jack.1'],['jack.2','SPP'],['ic.7','c11.+'],
+ ['BATP','w.S1'],['w.S2','ic.8'],['c14.+','BATP'],['c14.+','r7.1'],
+ ['r7.2','d2.A'],['d2.K','d3.A'],['d3.K','d4.A'],['r7.2','c13.+'],['c13.+','r1.1'],['c13.+','c6.1'],['c6.1','t1.2'],['t1.2','t2.2'],['t2.2','t3.2'],['r5.2','t3.2'],['c5.1','t3.2'],
+];
+
+/* ---- PCB textures ---- */
+const PS=16, PW=PCB.x1-PCB.x0, PH=PCB.y1-PCB.y0;
+const MOUNT = PCB_SCREWS.concat([BACK_SCREW]);
+const BIGHOLES = [];
+function footprint(g, c, X, Y, S){
+  const a=(c.rot||0)*PI/180; g.save(); g.translate(X(c.x),Y(c.y)); g.rotate(-a); g.lineWidth=0.18*S; g.strokeStyle='#f3f3ea';
+  const R=(w,h)=>g.strokeRect(-w/2*S,-h/2*S,w*S,h*S);
+  const t = c.b.toString();
+  if(t.includes('B_vc')) R(21,21);
+  else if(t.includes('B_pot')) { g.save(); g.translate(-2*S,0); R(8.6,13.6); g.restore(); }
+  else if(t.includes('B_sip')) { R(23.2,3.8); g.fillRect(-11.6*S,-1.9*S,1*S,3.8*S); }
+  else if(t.includes('B_can')) { R(8.8,8.8); g.beginPath(); g.arc(0,0,2.4*S,0,PI*2); g.stroke(); }
+  else if(t.includes('B_to92')) { g.beginPath(); g.moveTo(-2.7*S,1.1*S); g.lineTo(2.7*S,1.1*S); g.arc(0,1.1*S,2.7*S,0,PI,true); g.stroke(); }
+  else if(t.includes('B_dip8')) { R(10.4,7); g.beginPath(); g.arc(-5.2*S,0,0.9*S,-PI/2,PI/2); g.stroke(); }
+  else if(t.includes('B_elec')) { const r=parseFloat(t.match(/B_elec\(([\d.]+)/)[1]); g.beginPath(); g.arc(0,0,(r+0.4)*S,0,PI*2); g.stroke(); g.fillStyle='#f3f3ea'; g.fillRect(0.3*r*S, -(r+0.4)*S*0.6, 0.35*r*S, (r+0.4)*S*1.2); g.font=`700 ${1.6*S}px ${FONT}`; g.textAlign='center'; g.textBaseline='middle'; g.fillText('+',-(r+1.6)*S,0); }
+  else if(t.includes('B_disc')||t.includes('B_poly')) R(6.4,2.4);
+  else if(t.includes('B_cf')) R(7.6,3.6);
+  else if(t.includes('B_diode')) { R(4.8,2.2); g.fillStyle='#f3f3ea'; g.fillRect(1.2*S,-1.1*S,0.6*S,2.2*S); }
+  else if(t.includes('B_jack')) R(11.6,6.8);
+  else if(t.includes('B_tp')) { g.beginPath(); g.moveTo(-2.3*S,-1.4*S); g.lineTo(-2.3*S,1.4*S); g.moveTo(2.3*S,-1.4*S); g.lineTo(2.3*S,1.4*S); g.stroke(); }
+  else if(t.includes('stand')) { g.beginPath(); g.arc(-1.27*S,0,1.5*S,0,PI*2); g.stroke(); }
+  else if(t.includes('B_res')) R(7,2.6);
+  g.restore();
+}
+const LABEL_OFF = {vc:[0,-11], q1:[0,3.5], q2:[0,3.5], q3:[0,3.5], t1:[0,-5.6], t2:[0,-5.6], t3:[0,-5.6], cf:[0,2.8], ic:[0,3.2], jack:[0,4.3], c10:[0,5.4], c14:[0,5.4], c13:[0,4.4], c11:[0,4.4], c8:[0,3.8], c9:[0,3.8], w:[3,9], lc1:[0,2.2], lc2:[0,2.2], lc3:[0,2.2]};
+function drawPCB(g,w,h,bottom){
+  const S=PS, X = bottom? (x=>(x-PCB.x0)*S) : (x=>(PCB.x1-x)*S), Y=y=>(PCB.y1-y)*S;
+  g.fillStyle='#17653b'; g.fillRect(0,0,w,h);
+  g.lineCap='round'; g.lineJoin='round';
+  if(bottom){
+    g.fillStyle='#1f7a47'; g.fillRect(1.2*S,1.2*S,w-2.4*S,h-2.4*S);
+    g.strokeStyle='#17653b'; g.lineWidth=0.5*S; for(let x=4;x<PW;x+=6){ g.beginPath(); g.moveTo(x*S,1.2*S); g.lineTo(x*S,h-1.2*S); g.stroke(); }
+  }
+  const pads = PAD_LIST;
+  const route=(a,b,i)=>{ const [x0,y0]=PADS[a],[x1,y1]=PADS[b]; g.beginPath(); g.moveTo(X(x0),Y(y0)); if(i%2){ g.lineTo(X(x0),Y(y1)); } else { g.lineTo(X(x1),Y(y0)); } g.lineTo(X(x1),Y(y1)); g.stroke(); };
+  NETS.forEach((n,i)=>{ const onBottom = (i%3===1); if(onBottom!==bottom) return; if(!PADS[n[0]]||!PADS[n[1]]) return;
+    if(bottom){ g.strokeStyle='#17653b'; g.lineWidth=1.9*S; route(n[0],n[1],i); }
+    g.strokeStyle= bottom? '#2c9156' : '#2a8a50'; g.lineWidth=0.8*S; route(n[0],n[1],i); });
+  // clearance + pads
+  for(const p of pads){
+    if(bottom && !GND.has(p.name)){ g.fillStyle='#17653b'; g.beginPath(); g.arc(X(p.x),Y(p.y),1.7*S,0,PI*2); g.fill(); }
+    g.fillStyle='#d9dbd6'; g.beginPath(); g.arc(X(p.x),Y(p.y),(p.name.length<=4 && /^[A-Z]/.test(p.name)?1.2:0.95)*S,0,PI*2); g.fill();
+    if(bottom && GND.has(p.name)){ g.strokeStyle='#d9dbd6'; g.lineWidth=0.35*S; for(const a of [0,PI/2,PI,1.5*PI]){ g.beginPath(); g.moveTo(X(p.x),Y(p.y)); g.lineTo(X(p.x)+Math.cos(a)*1.7*S,Y(p.y)+Math.sin(a)*1.7*S); g.stroke(); } }
+    g.fillStyle='#101010'; g.beginPath(); g.arc(X(p.x),Y(p.y),0.42*S,0,PI*2); g.fill();
+  }
+  for(const [x,y] of MOUNT){ g.fillStyle='#d9dbd6'; g.beginPath(); g.arc(X(x),Y(y),2.5*S,0,PI*2); g.fill(); }
+  for(const [x,y] of BIGHOLES){ g.fillStyle='#d9dbd6'; g.beginPath(); g.arc(X(x),Y(y),4.1*S,0,PI*2); g.fill(); }
+  // silkscreen
+  g.fillStyle='#f3f3ea'; g.strokeStyle='#f3f3ea'; g.textAlign='center'; g.textBaseline='middle';
+  if(!bottom){
+    for(const c of COMP){ footprint(g,c,X,Y,S); const o=LABEL_OFF[c.id]||[0,-2.6]; g.font=`700 ${1.7*S}px ${FONT}`; g.fillText(c.des, X(c.x+o[0]), Y(c.y+o[1])); }
+    g.font=`700 ${1.6*S}px ${FONT}`;
+    g.fillText('ANT-1', X(-30), Y(26.5)); g.fillText('ANT-2', X(31), Y(27));
+    for(const k of ['A1','A2','A3','A4']) g.fillText(k.slice(1), X(EXTRA_PADS[k][0]), Y(EXTRA_PADS[k][1]+2.2));
+    g.fillText('SP',X(14),Y(13.5)); g.fillText('+',X(-51),Y(-9.5)); g.fillText('−',X(-51),Y(-29.5));
+    g.font=`800 ${3.4*S}px ${FONT}`; g.fillText('BG71CA', X(-27), Y(-30.5));
+    g.font=`800 ${3.0*S}px ${FONT}`; g.fillText('2P3', X(34), Y(-26));
+    g.font=`500 ${1.4*S}px ${FONT}`; g.fillText('MW SUPERHET · 双面板', X(-27), Y(-33));
+    g.font=`600 ${1.5*S}px ${FONT}`; g.fillStyle='rgba(243,243,234,.85)';
+    const zone=(t,x,y)=>g.fillText(t,X(x),Y(y));
+    zone('变频',12,25.5); zone('中放',30,26.8); zone('检波 AGC',12.5,-31); zone('低放',-24,25.5); zone('稳压',-48,-4.3);
+    g.fillText('A',X(21),Y(23.4)); g.fillText('B',X(19),Y(-0.7)); g.fillText('C',X(20),Y(-8.2));
+    g.setLineDash([0.8*S,0.6*S]); g.lineWidth=0.2*S; g.strokeRect(X(SHD.x1),Y(SHD.y1),(SHD.x1-SHD.x0)*S,(SHD.y1-SHD.y0)*S);
+    g.strokeRect(X(BATT.x+BATT.w/2),Y(BATT.y+BATT.h/2),BATT.w*S,BATT.h*S); g.setLineDash([]);
+  } else {
+    g.font=`800 ${3.2*S}px ${FONT}`; g.fillText('2P3', X(28), Y(-20));
+    g.font=`600 ${1.6*S}px ${FONT}`; g.fillText('焊接面 · GND 铺铜', X(28), Y(-24));
+    g.strokeStyle='#f3f3ea'; g.lineWidth=0.2*S; g.beginPath(); g.arc(X(DIAL.x),Y(DIAL.y),(DIAL.r+0.6)*S,0,PI*2); g.stroke();
+  }
+  // drill holes (transparent)
+  g.globalCompositeOperation='destination-out';
+  for(const [x,y] of MOUNT){ g.beginPath(); g.arc(X(x),Y(y),1.25*S,0,PI*2); g.fill(); }
+  g.beginPath(); g.arc(X(SPK.x),Y(SPK.y),SPK_HOLE*S,0,PI*2); g.fill();
+  g.fillRect(Math.min(X(CUT.x0),X(CUT.x1)),Y(CUT.y1),(CUT.x1-CUT.x0)*S,(CUT.y1-CUT.y0)*S);
+  g.globalCompositeOperation='source-over';
+}
+(function pcb(){
+  const g=new THREE.Group();
+  const s=shapeOf(rrectPts(PW,PH,1.5,(PCB.x0+PCB.x1)/2,(PCB.y0+PCB.y1)/2,4));
+  for(const [x,y] of MOUNT) s.holes.push(holeOf(circPts(x,y,1.25,14)));
+  s.holes.push(holeOf(circPts(SPK.x,SPK.y,SPK_HOLE,48)));
+  s.holes.push(holeOf(rrectPts(CUT.x1-CUT.x0,CUT.y1-CUT.y0,0.8,(CUT.x0+CUT.x1)/2,(CUT.y0+CUT.y1)/2,3)));
+  g.add(extrude(s,PCB.front-PCB.back,std(0xd8cf9c,{roughness:.7}),PCB.back));
+  const cx=(PCB.x0+PCB.x1)/2, cy=(PCB.y0+PCB.y1)/2;
+  const compT=canvasTex(PW*PS,PH*PS,(c,w,h)=>drawPCB(c,w,h,false));
+  const soldT=canvasTex(PW*PS,PH*PS,(c,w,h)=>drawPCB(c,w,h,true));
+  const comp=mesh(new THREE.PlaneGeometry(PW,PH), std(0xffffff,{map:compT, roughness:.42, alphaTest:.5}), cx,cy,PCB.back-0.02); comp.rotation.y=PI; g.add(comp);
+  const sold=mesh(new THREE.PlaneGeometry(PW,PH), std(0xffffff,{map:soldT, roughness:.42, alphaTest:.5}), cx,cy,PCB.front+0.02); g.add(sold);
+  const dome=new THREE.SphereGeometry(1,12,6,0,PI*2,0,PI/2); dome.rotateX(PI/2);
+  const pads=PAD_LIST.filter(p=>!p.name.startsWith('w.'));
+  const blobs=new THREE.InstancedMesh(dome, MAT.tin, pads.length);
+  const m=new THREE.Matrix4(), q=new THREE.Quaternion();
+  pads.forEach((p,i)=>{ m.compose(new V3(p.x,p.y,PCB.front+0.03), q, new V3(1.05,1.05,0.7)); blobs.setMatrixAt(i,m); });
+  g.add(blobs);
+  addPart('pcb', g, {name:'印刷电路板', des:'PCB', cat:'board', stage:'board', off:[0,0,-4], delay:.17, label:'电路板',
+    spec:'FR-4 双面板 · 约 104×68 mm · 中央开 Ø24 圆孔',
+    desc:'所有电子元件的“地基”与“导线”。2P3 的电路板几乎占满整个机壳：<b>中间开一个大圆孔</b>，让扬声器的磁钢穿过，整机才能做得这么薄；右下还开有缺口给音量拨轮让位。元件全部装在<b>朝后的元件面</b>（白色丝印标出位号），正面是焊接面，只装调谐拨盘和音量拨轮。新版改为<b>双面板</b>，省掉了老版本的大量跳线；并预留 A、B、C 三个电流测试断点。',
+    rel:['standoff','pcbscrews','shield','speaker']});
+})();
+
+/* ---- dynamic wires ---- */
+const WIRES=[];
+function wire(owner, aPart, aLocal, aDir, bPart, bLocal, bDir, mat, r=0.35, k=10){
+  WIRES.push({owner, aPart, aLocal:new V3(...aLocal), aDir:new V3(...aDir), bPart, bLocal:new V3(...bLocal), bDir:new V3(...bDir), mat:mat.clone(), r, k, mesh:null});
+}
+const pcbPt = n => [PADS[n][0], PADS[n][1], PCB.back-0.2];
+const pcbPtF = n => [PADS[n][0], PADS[n][1], PCB.front+0.2];
+wire('rod','rod',[-40.5,-1,ROD.r+0.3],[0,-0.3,1],'pcb',pcbPt('A1'),[0,0,-1],MAT.enamel,.22,4);
+wire('rod','rod',[-19,-1,ROD.r+0.3],[0,-0.3,1],'pcb',pcbPt('A2'),[0,0,-1],MAT.enamel,.22,4);
+wire('rod','rod',[19.5,-1,ROD.r+0.3],[0,-0.3,1],'pcb',pcbPt('A3'),[0,0,-1],MAT.enamel,.22,4);
+wire('rod','rod',[41.5,-1,ROD.r+0.3],[0,-0.3,1],'pcb',pcbPt('A4'),[0,0,-1],MAT.enamel,.22,4);
+wire('speaker','speaker',[22.6,6.6,11.9],[0,0,-1],'pcb',pcbPtF('SPP'),[0,0,1],MAT.redWire,.4,5);
+wire('speaker','speaker',[23.9,10.5,11.9],[0,0,-1],'pcb',pcbPtF('SPN'),[0,0,1],MAT.blackWire,.4,5);
+const _a=new V3(), _b=new V3();
+function updateWires(){
+  for(const w of WIRES){
+    const A=PID[w.aPart].obj, B=PID[w.bPart].obj;
+    A.updateMatrix(); B.updateMatrix();
+    _a.copy(w.aLocal).applyMatrix4(A.matrix); _b.copy(w.bLocal).applyMatrix4(B.matrix);
+    const da=w.aDir.clone().normalize().multiplyScalar(w.k), db=w.bDir.clone().normalize().multiplyScalar(w.k);
+    const dist=_a.distanceTo(_b); const s=Math.min(1+dist/60,4);
+    const curve=new THREE.CubicBezierCurve3(_a.clone(), _a.clone().add(da.multiplyScalar(s)), _b.clone().add(db.multiplyScalar(s)), _b.clone());
+    const geo=new THREE.TubeGeometry(curve,40,w.r,6,false);
+    if(!w.mesh){ w.mesh=new THREE.Mesh(geo,w.mat); w.mesh.userData.partId=w.owner; ASM.add(w.mesh); }
+    else { w.mesh.geometry.dispose(); w.mesh.geometry=geo; }
+  }
+}
+
+/* ---- per-part materials & bounds ---- */
+for(const p of PARTS){
+  const map=new Map(); p.mats=[];
+  p.obj.traverse(o=>{ if(!o.isMesh) return; const arr=Array.isArray(o.material)?o.material:[o.material];
+    const na=arr.map(m=>{ if(!map.has(m)){ const c=m.clone(); if(m.userData.isCase) c.userData.isCase=true; if(m.userData.isFace) c.userData.isFace=true; map.set(m,c); p.mats.push(c);} return map.get(m); });
+    o.material=Array.isArray(o.material)?na:na[0]; });
+  const b=new THREE.Box3().setFromObject(p.obj); p.center=b.getCenter(new V3()).sub(p.obj.position); p.size=b.getSize(new V3()); p.topZ=b.max.z-p.obj.position.z; p.botZ=b.min.z-p.obj.position.z;
+}
+for(const w of WIRES) PID[w.owner].mats.push(w.mat);
+for(const p of PARTS) p.obj.traverse(o=>{ if(!o.isMesh) return; const m=Array.isArray(o.material)?o.material[0]:o.material; const opaque=!m.transparent; o.castShadow=opaque; o.receiveShadow=opaque; });
+for(const p of PARTS) for(const m of p.mats){ m.userData.base={opacity:m.opacity, transparent:m.transparent, depthWrite:m.depthWrite}; if(!m.emissive) m.emissive=new THREE.Color(0); }
+const OCCL = new Set(['face','cover','badge','body','back','backscrew','dial']);
+const CASE_IDS = new Set(['face','cover','badge','body','back','backscrew']);
+
+/* ================= stages / flow ================= */
+const SIGC = {RF:'--rf', IF:'--if', AF:'--af', DC:'--dc', MECH:'--mech'};
+const cssVar = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const STAGES = [
+ {id:'ant', name:'磁性天线', sig:'RF', parts:['rod','holders'], text:f=>`空中无数电台的电磁波穿过磁棒，磁棒把磁力线聚拢，在线圈里感应出微伏级的高频电压。主线圈与双联天线联组成 LC 谐振回路，当前调谐在 <b>${f} kHz</b>，只有这个频率的电台被“放大”选出。`},
+ {id:'tune', name:'调谐选台', sig:'RF', parts:['vc','dial'], text:f=>`拨动刻度盘带动双联同步旋转：天线联让输入回路谐振在 <b>${f} kHz</b>，振荡联同时把本振调到 <b>${f+455} kHz</b>——两者始终相差 455 kHz，这就是“统调”。试试拖动底部的<b>调谐</b>滑块。`},
+ {id:'mix', name:'变频', sig:'RF', parts:['q1','t1','r1','r2','c1','c2','lc1'], text:f=>`Q1（9018）一管两用：与 T1 组成本机振荡器产生 ${f+455} kHz，同时把电台信号 ${f} kHz 与本振<b>混频</b>。输出中含有和频 ${2*f+455} kHz 与差频 <b>${f+455} − ${f} = 455 kHz</b>。无论收哪个台，差频都固定为 455 kHz。`},
+ {id:'cf', name:'陶瓷滤波', sig:'IF', parts:['cf'], text:()=>`三端陶瓷滤波器像一道“窄门”，只放行 <b>455 kHz ± 约 5 kHz</b> 的中频信号，和频、本振泄漏及邻近电台都被挡住——整机的选择性主要由它决定。`},
+ {id:'if1', name:'中放 Ⅰ', sig:'IF', parts:['q2','r3','lc2','t2','r4'], text:()=>`Q2 把 455 kHz 中频放大约数十倍，负载是黄磁帽中周 T2（调谐在 455 kHz）。Q2 的偏置受 <b>AGC</b> 控制：强台时自动降低增益。`},
+ {id:'if2', name:'中放 Ⅱ', sig:'IF', parts:['q3','r5','c4','c5','lc3','t3'], text:()=>`Q3 再次放大中频，经黑磁帽中周 T3 耦合到检波级。两级中放总增益可达数千倍，把微伏级信号放大到几百毫伏。`},
+ {id:'det', name:'检波 / AGC', sig:'AF', parts:['d1','c7','r6','c8','shield'], text:()=>`锗二极管 1N60 对中频<b>整流</b>，C7 滤掉 455 kHz 载波，剩下的就是电台的<b>音频</b>（约 50 Hz – 4.5 kHz）。另一路经 R6、C8 平滑成直流 AGC 电压，送回 Q2 控制增益。屏蔽罩防止检波谐波辐射引起啸叫。`},
+ {id:'vol', name:'音量', sig:'AF', parts:['w','c9'], text:()=>`音频加在音量电位器两端，拨轮位置决定取出多少信号送往功放。拨轮转到底会断开背面的电源开关。`},
+ {id:'amp', name:'功率放大', sig:'AF', parts:['ic','c11','c10','c12','r8'], text:()=>`TA7368 把几十毫伏的音频放大成足以推动扬声器的功率（3 V 时约 120 mW），经 220 μF 输出电容送出；C12 + R8 防止高频自激。`},
+ {id:'out', name:'扬声器', sig:'AF', parts:['speaker','jack'], text:()=>`音频电流流过音圈，音圈在永磁体磁场中受力振动，带动纸盆发出声音。插入耳机时，插孔内的簧片断开扬声器。`},
+ {id:'power', name:'电源', sig:'DC', parts:['bat','holder','d2','d3','d4','r7','c13','c6','c14'], text:()=>`两节 AA 串联得 3 V，经音量电位器上的开关接通：3 V 直接供给功放；再经 R7 与三只 1N4148 稳压到约 <b>1.8 V</b> 供给三只高频管。C14 是整机“蓄水池”，防止电池用旧时出现汽船声。`},
+];
+const STAGE_BY_ID = Object.fromEntries(STAGES.map(s=>[s.id,s]));
+const STAGE_NAME = Object.assign({mech:'结构件', board:'电路板', tune:'调谐选台'}, Object.fromEntries(STAGES.map(s=>[s.id,s.name])));
+const stageSig = id => (STAGE_BY_ID[id]||{}).sig || 'MECH';
+const MAIN_PATH = ['rod','vc','q1','t1','cf','q2','t2','q3','t3','d1','w','c9','ic','c10','jack','speaker'];
+const POWER_PATH = ['bat','holder','w','c14','r7','d2','d3','d4','c13','q1'];
+const PATH_SIG = {rod:'RF',vc:'RF',q1:'RF',t1:'IF',cf:'IF',q2:'IF',t2:'IF',q3:'IF',t3:'IF',d1:'AF',w:'AF',c9:'AF',ic:'AF',c10:'AF',jack:'AF',speaker:'AF'};
+
+/* ================= state ================= */
+const state = { explode:0, target:0, sel:null, stage:null, flow:null, flowPlay:true, flowT:0, xray:false, labels:true, rotate:false, f:1008, dirty:true, lookDirty:true };
+
+/* ================= camera controls ================= */
+const ctl = { target:new V3(8,0,0), tTarget:new V3(8,0,0), theta:.55, phi:1.16, r:360, tTheta:.55, tPhi:1.16, tR:360, busy:false };
+function applyCam(){
+  const sp=Math.sin(ctl.phi);
+  camera.position.set(ctl.target.x+ctl.r*sp*Math.sin(ctl.theta), ctl.target.y+ctl.r*Math.cos(ctl.phi), ctl.target.z+ctl.r*sp*Math.cos(ctl.theta));
+  camera.lookAt(ctl.target);
+}
+const ptrs=new Map(); let downPos=null, moved=0, pinch0=null;
+canvas.addEventListener('contextmenu',e=>e.preventDefault());
+canvas.addEventListener('pointerdown',e=>{
+  if(knobDown(e)) return;
+  canvas.setPointerCapture(e.pointerId); ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY,b:e.button,shift:e.shiftKey});
+  if(ptrs.size===1){ downPos={x:e.clientX,y:e.clientY}; moved=0; dragMode = (e.button===0 && !e.shiftKey && hitPart(e.clientX,e.clientY)) ? 'move' : 'rotate'; if(dragMode==='move') canvas.style.cursor='grabbing'; }
+  if(ptrs.size===2){ const [a,b]=[...ptrs.values()]; pinch0={d:Math.hypot(a.x-b.x,a.y-b.y), r:ctl.tR, mx:(a.x+b.x)/2, my:(a.y+b.y)/2}; }
+  ctl.busy=true;
+});
+let dragMode='rotate';
+function moveBy(dx,dy){
+  const k=2*ctl.r*Math.tan(camera.fov*PI/360)/window.innerHeight;
+  const right=new V3().setFromMatrixColumn(camera.matrix,0), up=new V3().setFromMatrixColumn(camera.matrix,1);
+  const d=right.multiplyScalar(-dx*k).add(up.multiplyScalar(dy*k));
+  ctl.tTarget.add(d); ctl.target.add(d);
+}
+function panBy(dx,dy){
+  const right=new V3().setFromMatrixColumn(camera.matrix,0), up=new V3().setFromMatrixColumn(camera.matrix,1);
+  const s=ctl.r*0.0016;
+  ctl.tTarget.addScaledVector(right,-dx*s).addScaledVector(up,dy*s);
+}
+canvas.addEventListener('pointermove',e=>{
+  hoverXY={x:e.clientX,y:e.clientY};
+  if(knobMove(e)) return;
+  const p=ptrs.get(e.pointerId); if(!p) return;
+  const dx=e.clientX-p.x, dy=e.clientY-p.y; p.x=e.clientX; p.y=e.clientY; moved+=Math.abs(dx)+Math.abs(dy);
+  if(ptrs.size===1){
+    if(p.b===2||p.b===1||p.shift||e.shiftKey) panBy(dx,dy);
+    else if(dragMode==='move') moveBy(dx,dy);
+    else { ctl.tTheta-=dx*0.0062; ctl.tPhi=clamp(ctl.tPhi-dy*0.0062,0.08,PI-0.08); }
+  } else if(ptrs.size===2 && pinch0){
+    const [a,b]=[...ptrs.values()]; const d=Math.hypot(a.x-b.x,a.y-b.y);
+    ctl.tR=clamp(pinch0.r*pinch0.d/Math.max(d,1),60,1400);
+    const mx=(a.x+b.x)/2, my=(a.y+b.y)/2; panBy(mx-pinch0.mx,my-pinch0.my); pinch0.mx=mx; pinch0.my=my;
+  }
+});
+function endPtr(e){
+  if(knobUp(e)) return;
+  const had=ptrs.has(e.pointerId); ptrs.delete(e.pointerId); if(ptrs.size<2) pinch0=null;
+  if(had && ptrs.size===0){ ctl.busy=false; if(moved<6 && downPos && e.type==='pointerup') pick(e.clientX,e.clientY); }
+}
+canvas.addEventListener('pointerup',endPtr); canvas.addEventListener('pointercancel',endPtr);
+canvas.addEventListener('pointerleave',()=>{ hoverXY=null; tip.classList.remove('show'); });
+canvas.addEventListener('wheel',e=>{ e.preventDefault(); if(knobWheel(e)) return; ctl.tR=clamp(ctl.tR*Math.exp(e.deltaY*0.0012),60,1400); },{passive:false});
+
+/* ================= picking ================= */
+const ray=new THREE.Raycaster(); const ndc=new V2();
+function hitPart(x,y){
+  ndc.set(x/window.innerWidth*2-1, -(y/window.innerHeight)*2+1); ray.setFromCamera(ndc,camera);
+  const hits=ray.intersectObject(ASM,true);
+  for(const h of hits){ const id=h.object.userData.partId; if(!id) continue; const look=PID[id].look; if(look==='ghost'||look==='hidden') continue; if(look==='dim' && CASE_IDS.has(id)) continue; return id; }
+  return null;
+}
+function pick(x,y){ const id=hitPart(x,y); if(id) select(id,true); else clearSel(); }
+const tip=$('#tip'); let hoverXY=null, hoverId=null;
+function updateHover(){
+  if(!hoverXY || ctl.busy && ptrs.size){ if(!hoverXY) return; }
+  const kh = (hoverXY && !ptrs.size) ? knobHit(hoverXY.x,hoverXY.y) : null;
+  if(kh){ hoverId='__knob'; canvas.style.cursor='grab'; tip.innerHTML = (window.__knob && !window.__knob.radio.on) ? '关机中<small>先点底部“开机”</small>' : kh==='dial' ? '按住拖动旋转调谐<small>滚轮微调</small>' : '按住上下拖动调节音量'; tip.classList.add('show'); tip.style.left=hoverXY.x+'px'; tip.style.top=hoverXY.y+'px'; return; }
+  const id = hoverXY ? hitPart(hoverXY.x,hoverXY.y) : null;
+  if(id!==hoverId){ hoverId=id; if(!ptrs.size) canvas.style.cursor=id?'grab':'default';
+    if(id){ const p=PID[id]; tip.innerHTML=`${p.name}${p.des&&p.des!=='—'?`<small>${p.des}</small>`:''}`; tip.classList.add('show'); } else tip.classList.remove('show'); }
+  if(hoverXY){ tip.style.left=hoverXY.x+'px'; tip.style.top=hoverXY.y+'px'; }
+}
+
+/* ================= looks ================= */
+const ACC=new THREE.Color();
+function setLook(p,look){
+  p.look=look; p.obj.visible = look!=='hidden';
+  for(const m of p.mats){ const b=m.userData.base; let tr=b.transparent, op=b.opacity, dw=b.depthWrite;
+    if(look==='dim'){ tr=true; op=Math.min(b.opacity,.1); dw=false; }
+    else if(look==='ghost'){ tr=true; op=Math.min(b.opacity,.13); dw=false; }
+    else if(look==='soft'){ tr=true; op=Math.min(b.opacity,.42); dw=false; }
+    if(m.transparent!==tr) m.needsUpdate=true;
+    m.transparent=tr; m.opacity=op; m.depthWrite=dw; m.emissive.setRGB(0,0,0); m.emissiveIntensity=1; }
+}
+function hiSet(){
+  if(state.sel) return new Set([state.sel]);
+  if(state.stage) return new Set(STAGE_BY_ID[state.stage]?STAGE_BY_ID[state.stage].parts:PARTS.filter(p=>p.cat===state.stage).map(p=>p.id));
+  if(state.flow!==null) return new Set(STAGES[state.flow].parts);
+  return null;
+}
+let HI=null;
+function applyLooks(){
+  HI=hiSet();
+  for(const p of PARTS){
+    let look='normal';
+    if(HI){ look = HI.has(p.id)?'hi':(OCCL.has(p.id)?'hidden':'dim'); if(state.flow!==null && !HI.has(p.id)) look = (CASE_IDS.has(p.id)||p.id==='dial'||p.id==='standoff'||p.id==='pcbscrews')?'hidden':(p.id==='pcb'?'normal':'soft'); }
+    else if(state.xray && CASE_IDS.has(p.id)) look='ghost';
+    setLook(p,look);
+  }
+  state.lookDirty=false;
+  document.querySelectorAll('.pi').forEach(el=>el.classList.toggle('on', el.dataset.id===state.sel));
+  document.querySelectorAll('.chip').forEach(el=>el.classList.toggle('on', el.dataset.id===state.stage || (state.flow!==null && STAGES[state.flow].id===el.dataset.id)));
+}
+
+/* ================= positions ================= */
+function applyPositions(){
+  const e=state.explode;
+  for(const p of PARTS){ const t=ease(clamp((e-p.delay)/0.65,0,1)); p.obj.position.copy(p.home).addScaledVector(p.off,t); }
+  updateWires();
+}
+function partWorldCenter(id){ const p=PID[id]; return p.obj.position.clone().add(p.center); }
+function applyTune(){
+  const fr=frac(state.f);
+  PID.dial.obj.rotation.z = -fr*PI;
+  PID.vc.comp.rotor.rotation.z = fr*PI;
+  $('#oTune').textContent = state.f+' kHz'; $('#sTune').value=state.f;
+  radioOnTune();
+  if(state.flow!==null) renderFlow();
+}
+
+/* ================= UI: parts list ================= */
+const CATS=[['case','外壳与结构件','--mech'],['tune','天线与调谐','--rf'],['mix','变频级','--rf'],['ifa','中频放大级','--if'],['det','检波与 AGC','--af'],['audio','音频放大与输出','--af'],['power','电源','--dc'],['board','电路板','--mech']];
+(function buildList(){
+  const el=$('#partsList'); let html='';
+  for(const [cat,name,col] of CATS){
+    const ps=PARTS.filter(p=>p.cat===cat); if(!ps.length) continue;
+    html+=`<div class="grp"><h4><i style="background:var(${col})"></i>${name} · ${ps.length}</h4>`;
+    for(const p of ps) html+=`<button class="pi" data-id="${p.id}"><span class="d">${p.des&&p.des!=='—'?p.des:''}</span>${p.name}</button>`;
+    html+='</div>';
+  }
+  el.innerHTML=html; $('#count').textContent=PARTS.length+' 项';
+  el.addEventListener('click',e=>{ const b=e.target.closest('.pi'); if(b) select(b.dataset.id,true); });
+})();
+(function buildStages(){
+  const el=$('#stages'); let html='';
+  STAGES.forEach((s,i)=>{ if(i) html+= s.id==='power'?'<span class="sep"></span>':'<span class="arrow">›</span>'; html+=`<button class="chip" data-id="${s.id}"><i style="background:var(${SIGC[s.sig]})"></i>${s.name}</button>`; });
+  el.innerHTML=html;
+  el.addEventListener('click',e=>{ const b=e.target.closest('.chip'); if(!b) return; if(state.flow!==null){ state.flow=STAGES.findIndex(s=>s.id===b.dataset.id); state.flowPlay=false; state.flowT=0; renderFlow(); state.lookDirty=true; return; } selectStage(b.dataset.id); });
+})();
+
+const info=$('#info');
+function badgeStage(stage){ const sig=stageSig(stage); return `<span class="badge st" style="background:var(${SIGC[sig]})">${STAGE_NAME[stage]||stage}</span>`; }
+function renderPartInfo(id){
+  const p=PID[id]; let rel=p.rel;
+  if(!rel){ const st=STAGE_BY_ID[p.stage]; rel = st? st.parts.filter(x=>x!==id):[]; }
+  const sigTxt = {RF:'高频信号（电台频率）',IF:'455 kHz 中频信号',AF:'音频信号',DC:'直流电源',MECH:'机械结构'}[stageSig(p.stage)];
+  info.innerHTML = `<button class="x" aria-label="关闭">×</button><h2>${p.name}</h2>
+   <div class="badges">${p.des&&p.des!=='—'?`<span class="badge des">${p.des}</span>`:''}${badgeStage(p.stage)}<span class="badge">${sigTxt}</span></div>
+   <p class="spec">${p.spec||''}</p><p class="desc">${p.desc||''}</p>
+   ${rel.length?`<div class="sec">相关零件</div><div class="rel">${rel.map(r=>`<button data-id="${r}">${PID[r]?PID[r].name:r}${PID[r]&&PID[r].des&&PID[r].des!=='—'?' '+PID[r].des:''}</button>`).join('')}</div>`:''}`;
+  info.classList.remove('hidden');
+}
+function renderStageInfo(sid){
+  const s=STAGE_BY_ID[sid];
+  info.innerHTML = `<button class="x" aria-label="关闭">×</button><h2>${s.name}</h2><div class="badges">${badgeStage(sid)}</div>
+   <p class="desc">${s.text(state.f)}</p><div class="sec">本级零件</div>
+   <div class="rel">${s.parts.map(r=>`<button data-id="${r}">${PID[r].name}${PID[r].des&&PID[r].des!=='—'?' '+PID[r].des:''}</button>`).join('')}</div>`;
+  info.classList.remove('hidden');
+}
+info.addEventListener('click',e=>{ if(e.target.closest('.x')){ clearSel(); return; } const b=e.target.closest('.rel button'); if(b) select(b.dataset.id,true); });
+
+function focusOn(ids, rMul=4.2){
+  const b=new THREE.Box3(); for(const id of ids){ const p=PID[id]; const c=p.obj.position.clone().add(p.center); b.expandByPoint(c.clone().addScaledVector(p.size,.5)); b.expandByPoint(c.clone().addScaledVector(p.size,-.5)); }
+  const c=b.getCenter(new V3()), s=b.getSize(new V3()).length();
+  ctl.tTarget.copy(c); ctl.tR=clamp(s*rMul*0.5+130,150,700);
+}
+function select(id, focus){
+  if(state.flow!==null) exitFlow();
+  state.sel=id; state.stage=null; state.lookDirty=true; renderPartInfo(id);
+  if(focus) focusOn([id]);
+  if(window.innerWidth<=760) $('#parts').classList.add('collapsed');
+}
+function selectStage(sid){
+  if(state.stage===sid){ clearSel(); return; }
+  state.sel=null; state.stage=sid; state.lookDirty=true; renderStageInfo(sid); focusOn(STAGE_BY_ID[sid].parts, 3.2);
+}
+function clearSel(){ state.sel=null; state.stage=null; state.lookDirty=true; info.classList.add('hidden'); }
+
+/* ================= flow mode ================= */
+const flowGrp=new THREE.Group(); scene.add(flowGrp); flowGrp.visible=false;
+const DOTS=[]; const dotGeo=new THREE.SphereGeometry(1.1,12,8);
+for(let i=0;i<46;i++){ const m=new THREE.Mesh(dotGeo,new THREE.MeshBasicMaterial({color:0xffffff, toneMapped:false, transparent:true, depthTest:false})); m.renderOrder=10; flowGrp.add(m); DOTS.push(m); }
+let flowCurve=null, flowSegs=[], pathLine=null;
+function buildFlowPath(){
+  const ids = (state.flow!==null && STAGES[state.flow].id==='power') ? POWER_PATH : MAIN_PATH;
+  const pts = ids.map(id=>{ const p=PID[id]; const c=p.obj.position.clone().add(p.center); if(p.comp) c.z = p.side==='back' ? p.obj.position.z+p.botZ-2.2 : p.obj.position.z+p.topZ+2.2; return c; });
+  const cp=new THREE.CurvePath(); flowSegs=[];
+  for(let i=0;i<pts.length-1;i++){ const a=pts[i], b=pts[i+1]; const m=a.clone().add(b).multiplyScalar(.5); m.z=Math.min(a.z,b.z)-Math.min(10,a.distanceTo(b)*.22); cp.add(new THREE.QuadraticBezierCurve3(a,m,b)); flowSegs.push(ids===POWER_PATH?'DC':PATH_SIG[ids[i+1]]); }
+  flowCurve=cp;
+  if(pathLine){ flowGrp.remove(pathLine); pathLine.geometry.dispose(); }
+  const g=new THREE.TubeGeometry(cp, ids.length*24, 0.32, 6, false);
+  pathLine=new THREE.Mesh(g,new THREE.MeshBasicMaterial({color:new THREE.Color(cssVar('--accent')||'#c2311e'), transparent:true, opacity:.35, depthTest:false, toneMapped:false})); pathLine.renderOrder=9; flowGrp.add(pathLine);
+}
+const SIGHEX={};
+function sigColor(s){ return SIGHEX[s] || (SIGHEX[s]=new THREE.Color(cssVar(SIGC[s])||'#fff')); }
+function renderFlow(){
+  const s=STAGES[state.flow];
+  $('#flowN').textContent=`${state.flow+1} / ${STAGES.length}`; $('#flowT').textContent=s.name;
+  $('#flowP').innerHTML=s.text(state.f);
+  const f=state.f;
+  $('#flowF').innerHTML = `<span>电台 <b>${f}</b> kHz</span><span>本振 <b>${f+455}</b> kHz</span><span>中频 <b>455</b> kHz</span><span>音频 <b>≈0.05–4.5</b> kHz</span>`;
+  $('#fPlay').textContent = state.flowPlay?'❚❚':'▶';
+}
+function enterFlow(){
+  state.sel=null; state.stage=null; info.classList.add('hidden');
+  state.flow=0; state.flowT=0; state.flowPlay=true; state.target=1;
+  $('#flow').classList.remove('hidden'); $('#bFlow').classList.add('on'); flowGrp.visible=true;
+  renderFlow(); state.lookDirty=true; flowNeedsPath=true;
+  ctl.tTarget.set(6,2,-14); ctl.tTheta=PI-.3; ctl.tPhi=.95; ctl.tR=250;
+}
+function exitFlow(){ state.flow=null; $('#flow').classList.add('hidden'); $('#bFlow').classList.remove('on'); flowGrp.visible=false; state.lookDirty=true; }
+let flowNeedsPath=true;
+function stepFlow(d){ const prevPower = STAGES[state.flow].id==='power'; state.flow=(state.flow+d+STAGES.length)%STAGES.length; state.flowT=0; if(prevPower !== (STAGES[state.flow].id==='power')) flowNeedsPath=true; renderFlow(); state.lookDirty=true; }
+$('#fPrev').onclick=()=>{ state.flowPlay=false; stepFlow(-1); };
+$('#fNext').onclick=()=>{ state.flowPlay=false; stepFlow(1); };
+$('#fPlay').onclick=()=>{ state.flowPlay=!state.flowPlay; renderFlow(); };
+$('#fClose').onclick=exitFlow;
+
+/* ================= labels ================= */
+const labelsEl=$('#labels'); const LBL=[];
+for(const p of PARTS) if(p.label){ const d=document.createElement('div'); d.className='lb'; d.innerHTML=`<i></i>${p.label}`; d.onclick=()=>select(p.id,true); labelsEl.appendChild(d); LBL.push({p,d}); }
+const _v=new V3();
+const LA={pcb:[.8,-1,0], bat:[-1,.3,0], holder:[-1,-.8,0], back:[.5,1,0], face:[-.6,1,0], cover:[.3,1,0], body:[1,.6,0], dial:[.6,.6,0], speaker:[-.6,.8,0], rod:[-.9,0,0], shield:[0,0,-1], vc:[0,0,-1], ic:[0,0,-1], w:[.7,-.3,1]};
+const _rc=new THREE.Raycaster();
+function occlusion(){
+  for(const L of LBL){ const p=L.p; const la=LA[p.id]||[0,1,0]; const t=p.obj.position.clone().add(p.center); t.x+=p.size.x*la[0]/2; t.y+=p.size.y*la[1]/2; t.z+=p.size.z*la[2]/2;
+    const dir=t.clone().sub(camera.position); const dist=dir.length(); _rc.set(camera.position, dir.normalize()); _rc.far=dist-3;
+    const hits=_rc.intersectObject(ASM,true); L.occ = hits.some(h=>{ const id=h.object.userData.partId; return id && id!==p.id && PID[id].look!=='ghost' && PID[id].look!=='dim' && !(id==='lens'); }); }
+}
+function updateLabels(){
+  const show = state.labels && state.explode>0.55 && state.flow===null;
+  const W=window.innerWidth, H=window.innerHeight; const placed=[];
+  for(const L of LBL){ const {p,d}=L;
+    let vis = show && (!HI || HI.has(p.id)) && !L.occ;
+    if(vis){ const la=LA[p.id]||[0,1,0]; _v.copy(p.obj.position).add(p.center); _v.x+=p.size.x*la[0]/2; _v.y+=p.size.y*la[1]/2; _v.z+=p.size.z*la[2]/2; _v.project(camera); if(_v.z>1) vis=false; else { const sx=(_v.x+1)/2*W, sy=(1-_v.y)/2*H; if(!L.w){ L.w=d.offsetWidth||60; }
+        const r=[sx-8, sy-12, sx+L.w, sy+12]; if(placed.some(q=>r[0]<q[2]&&r[2]>q[0]&&r[1]<q[3]&&r[3]>q[1])) vis=false; else { placed.push(r); d.style.left=sx+'px'; d.style.top=sy+'px'; } } }
+    d.style.opacity = vis?1:0; d.style.pointerEvents = vis?'auto':'none';
+  }
+}
+
+/* ================= toolbar ================= */
+const bEx=$('#bExplode'), sEx=$('#sExplode');
+function syncExplodeBtn(){ bEx.textContent = state.target>0.5 ? '组装' : '分解'; }
+bEx.onclick=()=>{ state.target = state.target>0.5?0:1; syncExplodeBtn(); if(state.target===0 && state.flow!==null) exitFlow(); };
+sEx.addEventListener('input',()=>{ state.target=state.explode=sEx.value/1000; state.dirty=true; syncExplodeBtn(); });
+$('#bFlow').onclick=()=>{ state.flow===null?enterFlow():exitFlow(); };
+$('#bXray').onclick=e=>{ state.xray=!state.xray; e.currentTarget.classList.toggle('on',state.xray); state.lookDirty=true; };
+$('#bLabels').onclick=e=>{ state.labels=!state.labels; e.currentTarget.classList.toggle('on',state.labels); };
+$('#bLabels').classList.add('on');
+$('#bRotate').onclick=e=>{ state.rotate=!state.rotate; e.currentTarget.classList.toggle('on',state.rotate); };
+/* ===== Android app mode (the APK's WebView adds "Tecsun2P3App" to its user agent) =====
+   Same page, same features; it just opens on the assembled radio, framed to fill the phone screen in either orientation. */
+// app layout: the Android APK, an iPhone/Android home-screen web app, or any phone-sized touch screen
+const APP=/Tecsun2P3App/.test(navigator.userAgent) || navigator.standalone===true
+  || (window.matchMedia && (matchMedia('(display-mode: standalone), (display-mode: fullscreen)').matches
+      || (matchMedia('(pointer: coarse)').matches && Math.min(screen.width,screen.height)<=820)));
+if(APP) document.documentElement.classList.add('app');
+function panelUp(){ const r=document.getElementById('radio'); return !!(r && !r.classList.contains('hidden')); }
+function appFitR(){
+  const w=window.innerWidth, h=window.innerHeight, t=Math.tan(camera.fov*PI/360), port=w<=760, pan=panelUp();
+  const availH = port ? (pan? h*0.40 : h-150) : h-140;
+  const availW = port ? w-24 : w-(pan? 380:40);
+  return Math.max(92/(2*t)*(h/Math.max(160,availH)), 126/(2*t*(w/h))*(w/Math.max(200,availW)));
+}
+function appView(){ state.target=0; if(typeof syncExplodeBtn==='function') syncExplodeBtn(); ctl.tTarget.set(0,0,0); ctl.tTheta=.3; ctl.tPhi=1.4; ctl.tR=appFitR(); }
+function resetView(){ if(APP && state.target<=0.5){ appView(); return; } const ex=state.target>0.5; ctl.tTarget.set(0,2,ex?-8:0); ctl.tTheta=ex?2.2:.45; ctl.tPhi=ex?1.1:1.22; ctl.tR = (ex? 430: 250) * (window.innerWidth<760? 1.6:1); }
+$('#bReset').onclick=()=>{ clearSel(); resetView(); };
+$('#sTune').addEventListener('input',e=>{ state.f=+e.target.value; applyTune(); if(state.stage && !state.sel) renderStageInfo(state.stage); });
+(function swatches(){
+  const el=$('#colorPick .sws');
+  CASE_COLORS.forEach((c,i)=>{ const b=document.createElement('button'); b.className='sw'+(i?'':' on'); b.style.background=c.ui||c.c; b.title='机身颜色：'+c.name; b.setAttribute('aria-label',b.title);
+    b.onclick=()=>{ caseColor=c; el.querySelectorAll('.sw').forEach(x=>x.classList.remove('on')); b.classList.add('on'); recolor(); }; el.appendChild(b); });
+})();
+function recolor(){
+  for(const p of PARTS) for(const m of p.mats) if(m.userData.isCase) m.color.set(caseColor.c);
+}
+
+$('#themeBtn').onclick=()=>{ const r=document.documentElement; const dark = r.dataset.theme!=='light'; if(dark) r.dataset.theme='light'; else delete r.dataset.theme; if(window.__applySceneTheme) window.__applySceneTheme(!dark); for(const k in SIGHEX) delete SIGHEX[k]; if(pathLine) pathLine.material.color.set(cssVar('--accent')); };
+$('#partsToggle').onclick=()=>$('#parts').classList.toggle('collapsed');
+/* desktop: the parts list slides out to the left; a tab on the left edge brings it back */
+function hideParts(h){ $('#parts').classList.toggle('hid',h); $('#pTab').classList.toggle('show',h); try{ localStorage.setItem('tecsun2p3.partsHidden', h?'1':'0'); }catch(e){} viewOffset(); }
+$('#pHide').onclick=()=>hideParts(true);
+$('#pTab').onclick=()=>hideParts(false);
+try{ if(!/Tecsun2P3App/.test(navigator.userAgent) && localStorage.getItem('tecsun2p3.partsHidden')==='1' && window.innerWidth>760) setTimeout(()=>hideParts(true),0); }catch(e){}
+if(window.innerWidth<=760) $('#parts').classList.add('collapsed');
+window.addEventListener('keydown',e=>{ if(e.key==='Escape'){ if(state.flow!==null) exitFlow(); else clearSel(); } if(e.key===' ' && (e.target===document.body||e.target===canvas)){ e.preventDefault(); bEx.click(); } });
+
+/* ================= loop ================= */
+function viewOffset(){ const w=window.innerWidth, h=window.innerHeight; const rpEl=document.getElementById('radio'); const infoOpen=!info.classList.contains('hidden') || (rpEl && !rpEl.classList.contains('hidden'));
+  const m=Math.min(150,w*0.1), leftOpen=!document.getElementById('parts').classList.contains('hid');
+  if(APP && w<=760) camera.setViewOffset(w,h,0,panelUp()? h*0.22 : h*0.02,w,h);
+  else if(APP) camera.setViewOffset(w,h,-(leftOpen?m:0)+(panelUp()? Math.min(190,w*0.21):0),0,w,h);
+  else if(w>900) camera.setViewOffset(w,h,-(leftOpen?m:0)+(infoOpen?m:0),0,w,h);
+  else if(w<=760 && infoOpen) camera.setViewOffset(w,h,0,h*0.2,w,h); else camera.clearViewOffset();
+  camera.updateProjectionMatrix(); }
+function resize(){ const w=window.innerWidth, h=window.innerHeight; renderer.setSize(w,h,false); camera.aspect=w/h; viewOffset(); if(APP && state.target<=0.5) ctl.tR=appFitR(); }
+new MutationObserver(viewOffset).observe(info,{attributes:true, attributeFilter:['class']});
+window.addEventListener('resize',resize); resize();
+let last=performance.now(), prevExplode=-1, frameN=0;
+function loop(now){
+  const dt=Math.min(0.05,(now-last)/1000); last=now; frameN++;
+  if(state.explode!==state.target){ const sp=dt/2.4; state.explode = state.explode<state.target? Math.min(state.target,state.explode+sp) : Math.max(state.target,state.explode-sp); sEx.value=Math.round(state.explode*1000); }
+  if(state.explode!==prevExplode){ applyPositions(); prevExplode=state.explode; if(state.flow!==null) flowNeedsPath=true; }
+  if(state.lookDirty) applyLooks();
+  // pulse
+  if(HI){ const k=.28+.2*Math.sin(now*0.005); ACC.set(cssVar('--accent')||'#c2311e'); for(const id of HI){ const p=PID[id]; if(!p) continue; for(const m of p.mats) m.emissive.copy(ACC).multiplyScalar(k); } }
+  // camera
+  if(state.rotate && !ctl.busy) ctl.tTheta+=dt*0.18;
+  const a=1-Math.pow(0.0015,dt);
+  ctl.theta+=(ctl.tTheta-ctl.theta)*a; ctl.phi+=(ctl.tPhi-ctl.phi)*a; ctl.r+=(ctl.tR-ctl.r)*a; ctl.target.lerp(ctl.tTarget,a);
+  applyCam();
+  // flow
+  if(state.flow!==null){
+    if(flowNeedsPath){ buildFlowPath(); flowNeedsPath=false; }
+    if(state.flowPlay){ state.flowT+=dt; if(state.flowT>6.5) stepFlow(1); }
+    const n=DOTS.length, L=flowSegs.length; const lens=flowCurve.getCurveLengths(), tot=flowCurve.getLength();
+    for(let i=0;i<n;i++){ const u=((now*0.00006)+i/n)%1; const p=flowCurve.getPointAt(u); DOTS[i].position.copy(p);
+      const dist=u*tot; let si=lens.findIndex(l=>l>=dist); if(si<0) si=L-1; DOTS[i].material.color.copy(sigColor(flowSegs[si]));
+      const s=.8+.35*Math.sin(now*0.01+i); DOTS[i].scale.setScalar(s); }
+  }
+  if(frameN%2===0) updateHover();
+  if(frameN%10===0 && state.labels && state.explode>0.55) occlusion();
+  updateLabels();
+  renderer.render(scene,camera);
+  requestAnimationFrame(loop);
+}
+
+/* ================= 收听：可拖动旋钮 + 在线电台 ================= */
+const QT = id => 'https://lhttp.qtfm.cn/live/'+id+'/64k.mp3';
+const QTHW = id => 'https://lhttp-hw.qtfm.cn/live/'+id+'/64k.mp3';
+const CNRSAT = k => 'https://satellitepull.cnr.cn/live/'+k+'/playlist.m3u8';
+const HB=CNRSAT('wx32hubzsgb'), CT=CNRSAT('wx32hubctjtgb');
+const NG_ZGZS='https://ngcdn001.cnr.cn/live/zgzs/index.m3u8', NG_JJZS='https://ngcdn002.cnr.cn/live/jjzs/index.m3u8';   // 央广 CDN (no CORS: used by native-HLS browsers)
+const DEFAULT_STATIONS = [
+  {f:603,  name:'武汉交通广播',     area:'武汉',              urls:[QT(4665), QTHW(4665)]},
+  {f:621,  name:'宜昌新闻综合广播', area:'宜昌（旧频率表）',  urls:[QT(20565), QTHW(20565)]},
+  {f:639,  name:'中国之声',         area:'中央台 · 襄阳发射', urls:[CNRSAT('wxzgzs'), NG_ZGZS]},
+  {f:684,  name:'楚天交通广播',     area:'湖北台 · 荆门转播', urls:[CT]},
+  {f:720,  name:'经济之声',         area:'中央台',            urls:[CNRSAT('wxjjzs'), NG_JJZS]},
+  {f:774,  name:'湖北之声',         area:'湖北台 · 武汉',     urls:[QT(1303), QTHW(1303), HB]},
+  {f:828,  name:'荆州广播电台',     area:'荆州 · 直播流为荆州交通广播', urls:[QT(1312), QTHW(1312)]},
+  {f:837,  name:'仙桃人民广播电台', area:'仙桃',              urls:[QTHW(20211562), QT(20211562)]},
+  {f:846,  name:'湖北之声',         area:'湖北台 · 转播',     urls:[QT(1303), QTHW(1303), HB]},
+  {f:873,  name:'武汉新闻广播',     area:'武汉',              urls:[QT(20198), QTHW(20198)]},
+  {f:900,  name:'黄冈新闻综合广播', area:'黄冈（同频：楚天广播 · 襄阳）', urls:[QTHW(1301), QT(1301)]},
+  {f:945,  name:'楚天交通广播',     area:'湖北台 · 荆州转播', urls:[CT]},
+  {f:963,  name:'黄石广播电台',     area:'黄石 · 黄广新闻台', urls:[QT(3964), QTHW(3964)]},
+  {f:1035, name:'中国之声',         area:'中央台 · 武汉/宜昌发射', urls:[CNRSAT('wxzgzs'), NG_ZGZS]},
+  {f:1053, name:'宜昌新闻综合广播', area:'宜昌',              urls:[QT(20565), QTHW(20565)]},
+  {f:1098, name:'襄阳之声',         area:'襄阳',              urls:[QT(1307), QTHW(1307)]},
+  {f:1125, name:'湖北经济广播',     area:'湖北台 · 武汉',     urls:[QT(1295), QTHW(1295)]},
+  {f:1161, name:'荆门综合广播',     area:'荆门',              urls:[QTHW(20211577), QT(20211577)]},
+  {f:1179, name:'楚天交通广播',     area:'楚天广播 · 武汉',   urls:[CT]},
+  {f:1242, name:'麻城综合广播',     area:'麻城（同频：潜江）', urls:['https://video.yscxy.cn:8888/mctv3.m3u8']},
+  {f:1314, name:'咸宁综合广播',     area:'咸宁（同频：襄阳新闻台）', urls:[QTHW(5067), QT(5067)]},
+  {f:1341, name:'应城综合广播',     area:'应城（同频：赤壁）', urls:[QTHW(20500227), QT(20500227)]},
+  {f:1368, name:'广水人民广播电台', area:'广水',              urls:[]},
+  {f:1386, name:'鄂州综合广播',     area:'鄂州（同频：石首）', urls:[QT(21025), QTHW(21025)]},
+  {f:1404, name:'湖北之声',         area:'湖北台 · 武汉',     urls:[QT(1303), QTHW(1303), HB]},
+  {f:1431, name:'丹江口人民广播电台', area:'丹江口',          urls:[]},
+  {f:1440, name:'湖北之声',         area:'湖北台 · 转播',     urls:[QT(1303), QTHW(1303), HB]},
+  {f:1476, name:'老河口人民广播电台', area:'老河口',          urls:[]},
+  {f:1485, name:'十堰综合广播',     area:'十堰',              urls:[QT(20338), QTHW(20338)]},
+  {f:1566, name:'孝感新闻综合广播', area:'孝感',              urls:[QTHW(5022064), QT(5022064)]},
+  {f:1584, name:'随州综合广播',     area:'随州',              urls:[QT(20853), QTHW(20853)]},
+];
+const LS_KEY='tecsun2p3.stations.v5';
+let STATIONS = (()=>{ try{ const s=JSON.parse(localStorage.getItem(LS_KEY)); if(Array.isArray(s)&&s.length) return s; }catch(e){} return DEFAULT_STATIONS.map(s=>({...s, urls:[...s.urls]})); })();
+function saveStations(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(STATIONS)); }catch(e){} }
+const fFromFrac = fr => { let lo=FMIN, hi=FMAX; for(let i=0;i<40;i++){ const m=(lo+hi)/2; if(frac(m)<fr) lo=m; else hi=m; } return (lo+hi)/2; };
+let fExact = state.f;
+function setFreq(f, fromSlider){
+  fExact = clamp(f, FMIN, FMAX);
+  state.f = Math.round(fExact);
+  const fr=frac(fExact);
+  PID.dial.obj.rotation.z = -fr*PI; PID.vc.comp.rotor.rotation.z = fr*PI;
+  $('#oTune').textContent = state.f+' kHz'; if(!fromSlider) $('#sTune').value=state.f;
+  if(state.flow!==null) renderFlow();
+  radioOnTune();
+}
+$('#sTune').addEventListener('input',e=>setFreq(+e.target.value,true));
+
+/* ---- volume wheel pivot ---- */
+const volPivot = (()=>{ const potG=PID.w.obj, c=new V3(VOL.x-46,0,VOL.z-PCB.front), piv=new THREE.Group(); piv.position.copy(c); potG.add(piv);
+  for(const m of PID.w.comp.wheel){ m.position.sub(c); piv.add(m); } return piv; })();
+
+/* ---- knob hit & drag ---- */
+const kRay=new THREE.Raycaster(), kNdc=new V2(); let knob=null;
+function knobHit(x,y){
+  const cand=[]; if(PID.dial.obj.visible && PID.dial.look!=='ghost') cand.push(PID.dial.obj); if(PID.w.obj.visible && PID.w.look!=='ghost') cand.push(volPivot);
+  if(!cand.length) return null;
+  kNdc.set(x/window.innerWidth*2-1, -(y/window.innerHeight)*2+1); kRay.setFromCamera(kNdc,camera);
+  const h=kRay.intersectObjects(cand,true); if(!h.length) return null;
+  let o=h[0].object; while(o){ if(o===volPivot) return 'vol'; if(o===PID.dial.obj) return 'dial'; o=o.parent; }
+  return null;
+}
+function dialScreen(){ const w=new V3(); PID.dial.obj.getWorldPosition(w); const n=new V3(0,0,1); const toCam=camera.position.clone().sub(w).normalize(); const p=w.clone().project(camera); return {x:(p.x+1)/2*window.innerWidth, y:(1-p.y)/2*window.innerHeight, facing:toCam.dot(n)}; }
+function knobDown(e){
+  const k=knobHit(e.clientX,e.clientY); if(!k) return false;
+  if(needPower()) return true;          // switched off: the knobs are inert (only the power button turns the set on)
+  canvas.setPointerCapture(e.pointerId); canvas.style.cursor='grabbing'; tip.classList.remove('show');
+  const d=dialScreen();
+  if(k==='dial') knobUsed=true;
+  knob={kind:k, id:e.pointerId, x:e.clientX, y:e.clientY, a:Math.atan2(e.clientY-d.y, e.clientX-d.x), c:d};
+  return true;
+}
+function knobMove(e){
+  if(!knob || e.pointerId!==knob.id) return false;
+  const dx=e.clientX-knob.x, dy=e.clientY-knob.y; knob.x=e.clientX; knob.y=e.clientY;
+  if(knob.kind==='dial'){
+    const c=knob.c; let dfr;
+    const rr=Math.hypot(e.clientX-c.x,e.clientY-c.y); const a=Math.atan2(e.clientY-c.y, e.clientX-c.x); let da=a-knob.a; if(da>PI) da-=2*PI; if(da<-PI) da+=2*PI; knob.a=a;
+    if(Math.abs(c.facing)>0.35 && rr>45) dfr = 0.5*da/PI * Math.sign(c.facing);   // clockwise drag (screen) → higher frequency
+    else dfr = (dy - dx)*0.0022;
+    setFreq(fFromFrac(clamp(frac(fExact)+dfr,0,1)));
+  } else {
+    setVolume(radio.vol - dy*0.006);
+  }
+  return true;
+}
+function knobUp(e){ if(!knob || e.pointerId!==knob.id) return false; const kind=knob.kind; knob=null; canvas.style.cursor='grab';
+  if(kind==='dial'){ const n=nearest(fExact); if(n.st && Math.abs(n.d)<=5 && Math.abs(n.d)>0.4) tuneTo(n.st.f); }
+  kickNow(); return true; }
+function knobWheel(e){
+  const k=knobHit(e.clientX,e.clientY); if(!k) return false;
+  if(needPower()) return true;
+  if(k==='dial') setFreq(Math.round(fExact) + (e.deltaY>0?1:-1)*(e.shiftKey?9:1));
+  else setVolume(radio.vol - Math.sign(e.deltaY)*0.05);
+  return true;
+}
+window.addEventListener('keydown',e=>{
+  if(!radioPanelOpen || !radio.on || e.target.closest('input')) return;
+  if(e.key==='ArrowRight'||e.key==='ArrowUp'){ e.preventDefault(); setFreq(Math.round(fExact)+(e.shiftKey?9:1)); }
+  if(e.key==='ArrowLeft'||e.key==='ArrowDown'){ e.preventDefault(); setFreq(Math.round(fExact)-(e.shiftKey?9:1)); }
+});
+
+/* ---- audio engine ---- */
+const mkAudio=cors=>{ const a=new Audio(); a.preload='none'; try{ a.referrerPolicy='no-referrer'; }catch(e){} a.style.display='none'; document.body.appendChild(a); return a; };
+// aC: CORS element routed through Web Audio (volume, spectrum analyser); aP: plain fallback for streams without CORS
+const radio={on:false, vol:0.6, ctx:null, noise:null, hum:null, aC:mkAudio(true), aP:mkAudio(false), cur:null, idx:0, hls:null, t:0, wd:0, status:'', net:'idle', src:'', tried:new Set(), plain:false, analyser:null, streamGain:null};
+radio.audio=radio.aC;
+const isHls = u => /\.m3u8(\?|$)/i.test(u);
+const nativeHls = () => !!radio.audio.canPlayType('application/vnd.apple.mpegurl');
+const hlsJsOk = () => typeof Hls!=='undefined' && Hls.isSupported();
+const srcLabel = u => /qtfm|qingting/.test(u)?'蜻蜓FM': /cnr\.cn/.test(u)?'央广云听': /appwuhan/.test(u)?'武汉广电': /radio-browser/.test(u)?'radio-browser':(u.split('/')[2]||'自定义');
+function silentWav(){ const n=800, b=new ArrayBuffer(44+n*2), v=new DataView(b); const w=(o,t)=>{ for(let i=0;i<t.length;i++) v.setUint8(o+i,t.charCodeAt(i)); };
+  w(0,'RIFF'); v.setUint32(4,36+n*2,true); w(8,'WAVE'); w(12,'fmt '); v.setUint32(16,16,true); v.setUint16(20,1,true); v.setUint16(22,1,true); v.setUint32(24,8000,true); v.setUint32(28,16000,true); v.setUint16(32,2,true); v.setUint16(34,16,true); w(36,'data'); v.setUint32(40,n*2,true);
+  return URL.createObjectURL(new Blob([b],{type:'audio/wav'})); }
+function unlockAudio(){ if(radio.unlocked||radio.cur) return; radio.unlocked=true; const u=radio.silent=silentWav(); for(const a of [radio.aC,radio.aP]){ try{ a.src=u; const p=a.play(); if(p&&p.catch) p.catch(()=>{ radio.unlocked=false; }); }catch(e){} } }
+function ensureCtx(){
+  // iPhone/iPad: play like a media app (ignores the ring/silent switch) — Safari 16.4+ Audio Session API
+  try{ if(navigator.audioSession && navigator.audioSession.type!=='playback') navigator.audioSession.type='playback'; }catch(e){}
+  unlockAudio();
+  if(!radio.ctx){
+    const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return;
+    const ctx=new AC(); radio.ctx=ctx;
+    const buf=ctx.createBuffer(1, ctx.sampleRate*2, ctx.sampleRate); const d=buf.getChannelData(0);
+    let b=0, mx=0; for(let i=0;i<d.length;i++){ const w=Math.random()*2-1; b=0.97*b+0.03*w; d[i]=w*0.6+b*2.2; mx=Math.max(mx,Math.abs(d[i])); } for(let i=0;i<d.length;i++) d[i]*=0.5/mx;
+    const src=ctx.createBufferSource(); src.buffer=buf; src.loop=true;
+    const bp=ctx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=1500; bp.Q.value=0.6;
+    const lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=4200;
+    const g=ctx.createGain(); g.gain.value=0;
+    // bus (signal before the volume control) → analyser (spectrum) ; bus → volume → speakers
+    const master=ctx.createGain(); const vol=ctx.createGain(); vol.gain.value=radio.vol; radio.volNode=vol; const an=ctx.createAnalyser(); an.fftSize=512; an.smoothingTimeConstant=0.72; master.connect(an); master.connect(vol); radio.analyser=an;
+    // SPATIAL stage (after the volume): the set's orientation to the listener → loudness, muffling and left/right balance
+    //   dry : presence (peaking 2.8 kHz) → low-pass → level → stereo pan
+    //   wet : small-room reverb, grows as the speaker turns away (you then mainly hear the sound bouncing off the room)
+    const sPr=ctx.createBiquadFilter(); sPr.type='peaking'; sPr.frequency.value=2800; sPr.Q.value=0.8; sPr.gain.value=3;
+    const sLP=ctx.createBiquadFilter(); sLP.type='lowpass'; sLP.frequency.value=18000; sLP.Q.value=0.6;
+    const sBox=ctx.createBiquadFilter(); sBox.type='peaking'; sBox.frequency.value=420; sBox.Q.value=1.1; sBox.gain.value=0;
+    const sG=ctx.createGain(); sG.gain.value=1;
+    const sP=ctx.createStereoPanner ? ctx.createStereoPanner() : null;
+    vol.connect(sPr); sPr.connect(sLP); sLP.connect(sBox); sBox.connect(sG); if(sP){ sG.connect(sP); sP.connect(ctx.destination); } else sG.connect(ctx.destination);
+    const rv=ctx.createConvolver(); rv.normalize=true;
+    { const len=Math.round(ctx.sampleRate*1.1), ir=ctx.createBuffer(2,len,ctx.sampleRate);
+      for(let c=0;c<2;c++){ const d=ir.getChannelData(c); let lp=0; for(let i=0;i<len;i++){ const t=i/ctx.sampleRate; lp=lp*0.55+(Math.random()*2-1)*0.45; d[i]=lp*Math.exp(-t*5.2)*(i<ctx.sampleRate*0.012?0:1); } }
+      rv.buffer=ir; }
+    const rvG=ctx.createGain(); rvG.gain.value=0.05; vol.connect(rv); rv.connect(rvG); rvG.connect(ctx.destination);
+    radio.spatial={pr:sPr, lp:sLP, box:sBox, g:sG, pan:sP, wet:rvG};
+    const outAn=ctx.createAnalyser(); outAn.fftSize=1024; vol.connect(outAn); radio.outAn=outAn;          // what really reaches the speakers (after the volume)
+    src.connect(bp); bp.connect(lp); lp.connect(g); g.connect(master); src.start();
+    const osc=ctx.createOscillator(); osc.type='sine'; osc.frequency.value=900; const og=ctx.createGain(); og.gain.value=0; osc.connect(og); og.connect(master); osc.start();
+    radio.noise=g; radio.hum={osc,g:og};
+    const sg=ctx.createGain(); sg.gain.value=0; sg.connect(master); radio.streamGain=sg;
+    radio.master=master;
+    const probe=ctx.createAnalyser(); probe.fftSize=1024; radio.probe=probe;                               // raw stream, to verify the Web Audio route really carries sound
+    try{ const me=ctx.createMediaElementSource(radio.aC); me.connect(sg); me.connect(probe); }catch(e){ radio.noRoute=true; }
+  }
+  if(radio.ctx.state==='suspended') radio.ctx.resume();
+}
+/* any interaction with the dial / wheel / station buttons switches the set on */
+/* POWER: the bottom 开机/关机 button is the ONLY switch. While off, the tuning dial, volume wheel and station buttons do nothing. */
+function needPower(){ if(radio.on) return false; flashOff(); return true; }
+let toastT=0;
+function flashOff(){ const t=$('#toast'); t.textContent='收音机处于关机状态 · 请先点底部“开机”按钮'; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),1800);
+  const b=$('#bRadio'); b.classList.remove('nudge'); void b.offsetWidth; b.classList.add('nudge'); }
+function nearest(f){ let best=null, s=0, d0=1e9; for(const st of STATIONS){ const d=Math.abs(f-st.f); const v= d<=2 ? 1 : Math.exp(-Math.pow((d-2)/3.5,2)); if(v>s||(!best&&d<d0)){ s=v; best=st; d0=d; } } return {st:best, s, d:best?f-best.f:999}; }
+function stopStream(){ radio.tok=(radio.tok||0)+1; clearTimeout(radio.wd); if(radio.fetchCtl){ try{ radio.fetchCtl.abort(); }catch(e){} radio.fetchCtl=null; } if(radio.objUrl){ const o=radio.objUrl; radio.objUrl=null; setTimeout(()=>URL.revokeObjectURL(o),1000); } if(radio.hls){ try{ radio.hls.destroy(); }catch(e){} radio.hls=null; } for(const a of [radio.aC,radio.aP]){ try{ a.pause(); }catch(e){} if(a.getAttribute('src')){ a.removeAttribute('src'); try{ a.load(); }catch(e){} } } }
+function switchTo(st){
+  stopStream(); radio.cur=st; radio.idx=0; radio.mi=0; radio.tried=new Set();
+  if(!st){ radio.net='idle'; radio.src=''; return; }
+  if(!navigator.onLine){ radio.net='offline'; return; }
+  trySource();
+}
+/* playback modes per address, in order of preference:
+   mse  – fetch() the MP3 stream and feed it through MediaSource → blob URL (same-origin, so the analyser can read it)
+   cors – <audio crossorigin> pointing at the stream (analysable if the server sends CORS)
+   plain– plain <audio> (always plays, but the browser hides the samples from the analyser)
+   hlsjs/native – for .m3u8 */
+function modesFor(u){
+  if(isHls(u)){ const m=[]; if(hlsJsOk()) m.push('hlsjs'); if(nativeHls()) m.push('native'); return m; }   // Safari: native HLS still plays when hls.js cannot load (e.g. file:// request limits)
+  const m=[]; if(window.MediaSource && MediaSource.isTypeSupported && MediaSource.isTypeSupported('audio/mpeg')) m.push('mse'); m.push('cors','plain'); return m;
+}
+function nextSource(reason){
+  if(!radio.cur) return;
+  console.warn('[2P3] 直播源失败', radio.src, radio.mode, reason);
+  // live CDNs hiccup: retry the same address a few times (fresh connection / fresh manifest) before giving up on it
+  radio.retry=(radio.retry||0)+1;
+  if(radio.retry<=(radio.played?6:2) && radio.mode!=='cors' && radio.mode!=='plain'){ radio.net='loading'; renderRadio(); const tok=radio.tok; setTimeout(()=>{ if(tok===radio.tok && radio.cur) startSource(true); }, Math.min(4000,700*radio.retry)); return; }
+  radio.retry=0;
+  const ms=modesFor(radio.src);
+  if(radio.mi+1<ms.length){ radio.mi++; startSource(); return; }
+  radio.mi=0; radio.idx++; trySource();
+}
+function trySource(){
+  const st=radio.cur; if(!st) return;
+  const list=(st.urls||[]).filter(Boolean);
+  while(radio.idx<list.length){
+    const u=list[radio.idx];
+    if(radio.tried.has(u) || !modesFor(u).length){ radio.idx++; continue; }
+    radio.tried.add(u); radio.src=u; radio.mi=0; startSource(); return;
+  }
+  // all built-in sources failed → ask the public radio-browser.info directory once
+  if(!st._rb){ st._rb=true; radio.net='search'; renderRadio(); rbLookup(st).then(found=>{ if(radio.cur!==st) return; const add=found.filter(u=>!radio.tried.has(u)); if(add.length){ st.urls=(st.urls||[]).concat(add); trySource(); } else { radio.net=(list.length?'error':'nostream'); renderRadio(); } }); return; }
+  radio.net = list.length ? 'error' : 'nostream'; renderRadio();
+}
+function startSource(isRetry){
+  const st=radio.cur, u=radio.src; if(!st) return; if(!isRetry){ radio.retry=0; radio.played=false; }
+  const mode=modesFor(u)[radio.mi]; radio.mode=mode;
+  radio.net='loading'; renderRadio();
+  stopStream(); const tok=radio.tok;
+  const a = (mode==='plain' || mode==='native' || radio.noRoute) ? radio.aP : radio.aC; radio.audio=a;
+  if(a===radio.aC){ if(mode==='cors') a.crossOrigin='anonymous'; else a.removeAttribute('crossorigin'); }
+  const fail = why => { if(tok===radio.tok) nextSource(why); };
+  if(mode==='hlsjs'){
+    const h=new Hls({enableWorker:true, lowLatencyMode:false, manifestLoadingMaxRetry:3, manifestLoadingRetryDelay:800, levelLoadingMaxRetry:6, levelLoadingRetryDelay:800, fragLoadingMaxRetry:6, fragLoadingRetryDelay:600, liveSyncDurationCount:3, liveMaxLatencyDurationCount:10});
+    radio.hls=h; let medRec=0; h.on(Hls.Events.ERROR,(ev,data)=>{ if(!data || !data.fatal || radio.hls!==h) return; if(data.type===Hls.ErrorTypes.MEDIA_ERROR && medRec++<2){ try{ h.recoverMediaError(); return; }catch(e){} } const det=data.details; setTimeout(()=>fail('hls '+det),0); });
+    h.loadSource(u); h.attachMedia(a);
+  } else if(mode==='mse'){
+    startMSE(u,a,tok,fail);
+  } else { a.src=u; }
+  const p=a.play(); if(p&&p.catch) p.catch(err=>{ if(tok===radio.tok && err && err.name==='NotAllowedError'){ radio.net='gesture'; renderRadio(); } });
+  radio.wd=setTimeout(()=>{ if(tok===radio.tok && radio.net!=='playing' && radio.net!=='gesture') fail('timeout'); }, mode==='mse'?7000:9000);
+}
+function startMSE(u,a,tok,fail){
+  const ctrl=new AbortController(); radio.fetchCtl=ctrl;
+  const ms=new MediaSource(); const obj=URL.createObjectURL(ms); radio.objUrl=obj; a.src=obj;
+  ms.addEventListener('sourceopen', async ()=>{
+    if(tok!==radio.tok) return;
+    let sb; try{ sb=ms.addSourceBuffer('audio/mpeg'); sb.mode='sequence'; }catch(e){ return fail('mse '+e.name); }
+    let resp; try{ resp=await fetch(u,{signal:ctrl.signal, cache:'no-store', referrerPolicy:'no-referrer', credentials:'omit'}); }catch(e){ return fail('fetch '+(e.message||e)); }
+    if(!resp.ok || !resp.body) return fail('http '+resp.status);
+    const rd=resp.body.getReader(), q=[]; let started=false;
+    const pump=()=>{
+      if(tok!==radio.tok || ms.readyState!=='open' || sb.updating || !q.length) return;
+      try{ const b=sb.buffered; if(b.length && a.currentTime-b.start(0)>40){ sb.remove(b.start(0), a.currentTime-15); return; } }catch(e){}
+      try{ sb.appendBuffer(q.shift()); }catch(e){ if(e.name!=='QuotaExceededError') fail('append '+e.name); }
+    };
+    sb.addEventListener('updateend',()=>{
+      if(tok!==radio.tok || ms.readyState!=='open') return;
+      if(!started && sb.buffered.length && sb.buffered.end(0)>0.25){ started=true; const p=a.play(); if(p&&p.catch) p.catch(()=>{}); }
+      // stay close to the live edge
+      try{ const b=sb.buffered; if(b.length){ const end=b.end(b.length-1); if(end-a.currentTime>6) a.currentTime=end-1.5; } }catch(e){}
+      pump();
+    });
+    let err=null; try{ for(;;){ const {done,value}=await rd.read(); if(done || tok!==radio.tok) break; q.push(value); pump(); } }catch(e){ err=e; }
+    if(tok!==radio.tok) return;
+    if(!started){ const chk=()=>{ if(tok!==radio.tok) return; if(q.length||sb.updating){ setTimeout(chk,200); return; } let e=0; try{ e=sb.buffered.length?sb.buffered.end(0):0; }catch(x){} if(e>0.25){ started=true; a.play().catch(()=>{}); try{ ms.endOfStream(); }catch(x){} } else fail('stream ended '+(err&&err.message||'')); }; chk(); return; }
+    // the live connection dropped after playing: let the buffer drain, then reconnect
+    const fin=()=>{ if(tok!==radio.tok) return; if(q.length||sb.updating){ setTimeout(fin,300); return; } try{ ms.endOfStream(); }catch(e){} };
+    fin();
+  },{once:true});
+}
+async function rbLookup(st){
+  const hosts=['de1.api.radio-browser.info','fi1.api.radio-browser.info','nl1.api.radio-browser.info'];
+  for(const h of hosts){
+    try{ const c=new AbortController(); setTimeout(()=>c.abort(),6000);
+      const r=await fetch(`https://${h}/json/stations/search?hidebroken=true&limit=15&name=${encodeURIComponent(st.name)}`,{signal:c.signal});
+      const j=await r.json(); const key=st.name.slice(0,2); const urls=j.filter(x=>x.lastcheckok && (x.name||'').includes(key)).sort((x,y)=>(y.codec==='MP3')-(x.codec==='MP3')).map(x=>x.url_resolved||x.url).filter(u=>/^https?:/.test(u));
+      return [...new Set(urls)].slice(0,6);
+    }catch(e){}
+  }
+  return [];
+}
+for(const el of [radio.aC,radio.aP]){
+  el.addEventListener('ended',()=>{ if(radio.cur && el===radio.audio){ console.warn('[2P3] 直播中断，重新连接'); startSource(); } });
+  el.addEventListener('playing',()=>{ if(!radio.cur||el!==radio.audio) return; clearTimeout(radio.wd); radio.net='playing'; radio.played=true; radio.retry=0; radioOnTune(); });
+  el.addEventListener('canplay',()=>{ if(radio.cur&&el===radio.audio) radioOnTune(); });
+  el.addEventListener('pause',()=>{ if(radio.cur&&el===radio.audio) radioOnTune(); });
+  el.addEventListener('waiting',()=>{ if(radio.cur && el===radio.audio && radio.net==='playing'){ radio.net='loading'; radioOnTune(); } });
+  el.addEventListener('error',()=>{ if(radio.cur && el===radio.audio && !radio.hls && el.getAttribute('src') && el.src!==radio.silent && radio.net!=='playing') nextSource('media error '+(el.error&&el.error.code)); else if(radio.cur && el===radio.audio && radio.net==='playing'){ radio.cur=null; radioOnTune(); } });
+}
+window.addEventListener('online',()=>{ if(radio.on){ radio.cur=null; radioOnTune(); } });
+/* a real click/tap may start playback immediately (needed by strict autoplay policies) */
+function kickNow(){ const n=nearest(fExact); const w=(radio.on&&n.s>0.05)?n.st:null; if(w && (w!==radio.cur || radio.net==='gesture' || radio.net==='error')){ clearTimeout(radio.t); switchTo(w); renderRadio(); } else if(w && radio.audio.paused && radio.net!=='loading'){ const p=radio.audio.play(); if(p&&p.catch) p.catch(()=>{}); } }
+function radioOnTune(){
+  if(Math.round(fExact)!==state.f) fExact=state.f;
+  const {st,s,d}=nearest(fExact);
+  const want = (radio.on && s>0.05) ? st : null;
+  if(want!==radio.cur){ clearTimeout(radio.t); radio.t=setTimeout(()=>{ const n=nearest(fExact); const w=(radio.on&&n.s>0.05)?n.st:null; if(w!==radio.cur){ switchTo(w); renderRadio(); } },want?250:0); }
+  const a=radio.audio; const live = radio.on && radio.cur===st && !a.paused && a.readyState>=3 && radio.net!=='loading';
+  if(radio.ctx && radio.ctx.state==='suspended' && radio.on) radio.ctx.resume();
+  const sv = radio.on ? clamp(radio.vol*Math.pow(s,0.9),0,1) : 0;
+  const sig = radio.on ? clamp(Math.pow(s,0.9),0,1) : 0;
+  radio.sig=sig; applyVolume();
+  if(radio.ctx){
+    const t=radio.ctx.currentTime;
+    const nz = !radio.on ? 0 : ( live ? (s>=0.999 ? 0 : 0.35*Math.pow(1-s,1.5)) : (s>0.05 ? 0.12 : 0.3) );
+    radio.noise.gain.setTargetAtTime(nz, t, 0.05);
+    const whistle = (radio.on && s>0.05 && s<0.9 && live) ? 0.012*(1-s) : 0;
+    radio.hum.osc.frequency.setTargetAtTime(Math.min(3000,300+Math.abs(d)*260), t, 0.05); radio.hum.g.gain.setTargetAtTime(whistle, t, 0.05);
+  }
+  renderRadio(s,st);
+}
+/* ===== SPATIAL SOUND =====
+   The loudspeaker sits behind the front grille and faces the radio's +Z. Every frame we look at where that face points
+   relative to the camera (= the listener):
+   · facing the listener → full level, full treble;  edge-on → quieter;  turned away → much quieter and muffled
+     (only the back louvres let sound out, high frequencies are lost);
+   · turned to the listener's left/right, or moved to the left/right of the screen → that channel is louder. */
+const SPATIAL={gain:1, pan:0, cut:18000, pres:4, box:0, wet:0.04};
+const _sf=new V3(), _sp=new V3(), _q=new THREE.Quaternion();
+function updateSpatial(){
+  const spk=PID.speaker.obj; spk.getWorldQuaternion(_q);
+  _sf.set(0,0,1).applyQuaternion(_q).applyQuaternion(camera.quaternion.clone().invert());   // speaker axis in camera space
+  const face=clamp(_sf.z,-1,1), f01=(face+1)/2;                                             // 1 = facing the listener, 0 = facing away
+  spk.getWorldPosition(_sp); _sp.project(camera);
+  // tuned on speech/music (not only on hiss): the contrast front ↔ back is ≈ 20 dB plus a strong change of timbre
+  SPATIAL.gain = 0.09 + 0.91*Math.pow(f01,1.7);                      // front 1 · edge-on ≈ 0.36 · back 0.09
+  SPATIAL.cut  = 650*Math.pow(18000/650, Math.pow(f01,1.15));        // back ≈ 650 Hz (muffled) → front 18 kHz
+  SPATIAL.pres = -9 + 13*f01;                                         // presence: +4 dB facing you, −9 dB turned away
+  SPATIAL.box  = 7*Math.pow(1-f01,1.5);                               // boxy cabinet resonance heard from behind
+  SPATIAL.wet  = 0.04 + 0.42*Math.pow(1-f01,1.3);                     // room reverb takes over when it faces away
+  SPATIAL.pan  = clamp(_sf.x*0.95 + clamp(_sp.x,-1.2,1.2)*0.3, -0.98, 0.98);
+  const sp=radio.spatial; if(!sp || !radio.ctx) return; const t=radio.ctx.currentTime;
+  sp.g.gain.setTargetAtTime(SPATIAL.gain, t, 0.05); sp.lp.frequency.setTargetAtTime(SPATIAL.cut, t, 0.05);
+  sp.pr.gain.setTargetAtTime(SPATIAL.pres, t, 0.05); sp.box.gain.setTargetAtTime(SPATIAL.box, t, 0.05); sp.wet.gain.setTargetAtTime(SPATIAL.wet, t, 0.05);
+  if(sp.pan) sp.pan.pan.setTargetAtTime(SPATIAL.pan, t, 0.05);
+}
+(function spatialLoop(){ if(radio.on) updateSpatial(); requestAnimationFrame(spatialLoop); })();
+/* ===== VOLUME — single source of truth (do not set gains / element.volume anywhere else) =====
+   Every output path is covered:
+   · routed  : <audio aC> → MediaElementSource → streamGain(sig) → master → volNode(vol) → speakers
+   · direct  : <audio aP> (no CORS / native HLS) or a route the browser silently bypassed → element.volume = vol·sig
+   applyVolume() runs on every change AND from a 250 ms watchdog, so no code path can leave the volume stale. */
+function routedNow(){ return radio.audio===radio.aC && !radio.noRoute && !radio.routeBroken && !!radio.streamGain; }
+function applyVolume(){
+  const on=radio.on, v=on?clamp(radio.vol,0,1):0, sig=on?(radio.sig==null?1:radio.sig):0, a=radio.audio;
+  if(radio.ctx){ const t=radio.ctx.currentTime;
+    radio.volNode.gain.cancelScheduledValues(t); radio.volNode.gain.setTargetAtTime(v, t, 0.03);
+    radio.streamGain.gain.cancelScheduledValues(t); radio.streamGain.gain.setTargetAtTime((a===radio.aC && !radio.noRoute)?sig:0, t, 0.04);
+    if(on && radio.ctx.state!=='running' && radio.ctx.state!=='closed') radio.ctx.resume().catch(()=>{});   // 'suspended' or iOS 'interrupted'
+  }
+  const other = a===radio.aC ? radio.aP : radio.aC;
+  if(routedNow()){ a.volume=1; a.muted=false; }
+  else if(TAP.live){ try{ a.volume=0; }catch(e){} a.muted=true; }          // the PCM player carries the sound
+  else { try{ a.volume=clamp(v*Math.pow(sig,0.9)*SPATIAL.gain,0,1); }catch(e){} a.muted=!on; }
+  try{ other.volume=0; other.muted=true; }catch(e){}
+  radio.appliedVol=v;
+}
+/* ===== PCM PLAYER (MP3 → Web Audio) =====
+   When the browser plays the stream outside Web Audio (plain <audio>, or it silently bypasses the route), the volume could only
+   scale the element and the spatial sound (pan, muffling, reverb) and the spectrum could not act on the station at all.
+   Then we fetch the MP3 stream ourselves, decode it in ~1 s blocks and play the blocks back-to-back through the same
+   Web Audio chain as everything else; the <audio> element keeps running muted.  Blocks are decoded with a few frames of
+   overlap and spliced at the sample where the waveforms line up (cross-correlation), so there are no clicks or gaps. */
+const TAP={tok:0, ctl:null, on:false, ok:false, u:'', failU:'', nextT:0, corr:[], live:false};
+const isMp3 = u => /\.mp3(\?|$)/i.test(u||'');
+function tapAbort(){ TAP.tok++; if(TAP.ctl){ try{ TAP.ctl.abort(); }catch(e){} } TAP.ctl=null; TAP.on=false; }
+function tapStop(){ tapAbort(); TAP.ok=false; TAP.u=''; TAP.live=false; for(const n of (TAP.srcs||[])){ try{ n.stop(); }catch(e){} } TAP.srcs=[]; }
+const MP3BR=[[0,32,40,48,56,64,80,96,112,128,160,192,224,256,320],[0,8,16,24,32,40,48,56,64,80,96,112,128,144,160]];
+const MP3SR=[[44100,48000,32000],[22050,24000,16000],[11025,12000,8000]];
+function mp3Frame(b,i){                       // → {len, spf} or null
+  if(i+4>b.length || b[i]!==0xFF || (b[i+1]&0xE0)!==0xE0) return null;
+  const ver=(b[i+1]>>3)&3, lay=(b[i+1]>>1)&3; if(ver===1 || lay!==1) return null;          // Layer III only
+  const bri=b[i+2]>>4, sri=(b[i+2]>>2)&3, pad=(b[i+2]>>1)&1; if(bri===0||bri===15||sri===3) return null;
+  const v1=ver===3, br=MP3BR[v1?0:1][bri]*1000, sr=MP3SR[ver===3?0:ver===2?1:2][sri];
+  return {len: Math.floor((v1?144:72)*br/sr)+pad, spf: v1?1152:576, sr};
+}
+async function tapStart(u){
+  if(TAP.u!==u){ TAP.ok=false; TAP.live=false; } tapAbort(); if(!radio.ctx) return;
+  const tok=TAP.tok, ctl=new AbortController(); TAP.ctl=ctl; TAP.on=true; TAP.u=u; TAP.srcs=TAP.srcs||[];
+  if(!radio.pcmGain){ radio.pcmGain=radio.ctx.createGain(); radio.pcmGain.gain.value=0; radio.pcmGain.connect(radio.master); }
+  let r; try{ r=await fetch(u,{signal:ctl.signal, cache:'no-store', credentials:'omit', referrerPolicy:'no-referrer'}); }catch(e){ if(tok===TAP.tok){ TAP.on=false; TAP.failU=u; } return; }
+  if(!r.ok || !r.body){ if(tok===TAP.tok){ TAP.on=false; TAP.failU=u; } return; }
+  const rd=r.body.getReader(); let buf=new Uint8Array(0), frames=[], tail=[], prev=null, busy=Promise.resolve();
+  const K=6;                                                     // overlap: frames re-sent from the previous block
+  const feed=()=>{                                               // cut complete frames out of the byte buffer
+    let i=0;
+    while(i+4<=buf.length){ const f=mp3Frame(buf,i); if(!f){ i++; continue; } if(i+f.len>buf.length) break;
+      const nx=mp3Frame(buf,i+f.len); if(i+f.len+4<=buf.length && !nx){ i++; continue; }      // validate by the next header
+      frames.push({b:buf.subarray(i,i+f.len), spf:f.spf, sr:f.sr}); i+=f.len; }
+    buf=buf.slice(i);
+  };
+  const decodeBlock=(blk)=>{
+    const all=tail.concat(blk); tail=all.slice(-K);
+    let n=0; for(const f of all) n+=f.b.length; const bytes=new Uint8Array(n); let o=0; for(const f of all){ bytes.set(f.b,o); o+=f.b.length; }
+    const spfO=Math.round(all[0].spf*radio.ctx.sampleRate/all[0].sr), ovl=all.length-blk.length;
+    busy=busy.then(()=>radio.ctx.decodeAudioData(bytes.buffer).then(ab=>{ if(tok===TAP.tok) schedule(ab, ovl, spfO); }).catch(()=>{}));
+  };
+  const schedule=(ab, ovl, spfO)=>{
+    const ctx=radio.ctx, now=ctx.currentTime; let j=0;
+    if(prev && ovl>=3 && TAP.nextT>now+0.02){
+      // find where the end of the previous block continues inside this one
+      const P=prev.getChannelData(0), B=ab.getChannelData(0), T=1024, pEnd=P.length-Math.round(spfO*1.5), p0=pEnd-T;
+      const exp=Math.max(0, ovl*spfO - Math.round(spfO*1.5) - T), lo=Math.max(0,exp-2600), hi=Math.min(B.length-T-1, exp+2600);
+      let best=-2, bo=exp, ep=0; for(let k=0;k<T;k++) ep+=P[p0+k]*P[p0+k];
+      for(let o=lo;o<=hi;o++){ let c=0, eb=0; for(let k=0;k<T;k+=2){ const x=B[o+k]; c+=P[p0+k]*x; eb+=x*x; } const nc=c/Math.sqrt(ep*eb*0.5+1e-12); if(nc>best){ best=nc; bo=o; } }
+      j = best>0.6 ? bo + T + Math.round(spfO*1.5) : ovl*spfO;
+      TAP.corr.push(+best.toFixed(3)); if(TAP.corr.length>20) TAP.corr.shift();
+    } else {
+      j = prev ? ovl*spfO : Math.min(ab.length-1, 2*spfO);         // first block (or after an underrun): skip warm-up frames
+      if(TAP.nextT<now+0.05) TAP.nextT=now+0.9;                    // (re)start with ~0.9 s of cushion against network jitter
+    }
+    prev=ab; if(j>=ab.length) return;
+    const src=ctx.createBufferSource(); src.buffer=ab; src.connect(radio.pcmGain);
+    src.start(TAP.nextT, j/ab.sampleRate); TAP.nextT += (ab.length-j)/ab.sampleRate; TAP.ok=true;
+    TAP.srcs.push(src); src.onended=()=>{ const k=TAP.srcs.indexOf(src); if(k>=0) TAP.srcs.splice(k,1); };
+  };
+  for(;;){
+    let x; try{ x=await rd.read(); }catch(e){ break; } if(x.done || tok!==TAP.tok) break;
+    const nb=new Uint8Array(buf.length+x.value.length); nb.set(buf); nb.set(x.value,buf.length); buf=nb; feed();
+    const per=frames.length? Math.round(frames[0].sr/frames[0].spf) : 38;                   // ≈ frames per second
+    while(frames.length>=per){ decodeBlock(frames.splice(0,per)); }
+  }
+  if(frames.length) decodeBlock(frames.splice(0));
+  if(tok===TAP.tok){ TAP.on=false; TAP.endAt=performance.now(); }
+}
+const rmsOf=(an,buf)=>{ an.getFloatTimeDomainData(buf); let q=0; for(let i=0;i<buf.length;i++) q+=buf[i]*buf[i]; return Math.sqrt(q/buf.length); };
+const probeBuf=new Float32Array(1024);
+setInterval(()=>{
+  applyVolume();
+  // route check: aC is playing but no samples reach Web Audio (browser bypass / suspended graph) → fall back to element.volume
+  const a=radio.audio;
+  if(radio.probe && a===radio.aC && !radio.noRoute && radio.on && radio.net==='playing' && !a.paused && radio.ctx.state==='running'){
+    const r=rmsOf(radio.probe,probeBuf);
+    if(r>1e-4){ radio.silentN=0; if(radio.routeBroken){ radio.routeBroken=false; console.warn('[2P3] Web Audio 路由恢复'); applyVolume(); } }
+    else if((radio.silentN=(radio.silentN||0)+1)>=20 && !radio.routeBroken){ radio.routeBroken=true; console.warn('[2P3] 浏览器绕过了 Web Audio，音量改由播放器元素控制'); applyVolume(); }
+  } else radio.silentN=0;
+  // keep the spectrum real when the element is not routed
+  const needTap = radio.on && radio.cur && radio.net==='playing' && !routedNow() && isMp3(radio.src);
+  if(needTap){ if(!TAP.on && TAP.failU!==radio.src && !(performance.now()-(TAP.endAt||0)<1000)) tapStart(radio.src); else if(TAP.on && TAP.u!==radio.src) tapStart(radio.src); }
+  else if(TAP.on || TAP.ok) tapStop();
+  TAP.live = needTap && TAP.ok && radio.ctx && TAP.nextT > radio.ctx.currentTime+0.15;
+  if(radio.pcmGain) radio.pcmGain.gain.setTargetAtTime(TAP.live ? (radio.on?(radio.sig==null?1:radio.sig):0) : 0, radio.ctx.currentTime, 0.03);
+  applyVolume();
+}, 250);
+function setVolume(v){
+  radio.vol=clamp(v,0,1); volPivot.rotation.x = -radio.vol*PI*1.4;
+  $('#rVol').value=Math.round(radio.vol*100); syncPower(); radioOnTune();
+}
+function syncPower(){ const b=$('#bRadio'); b.classList.toggle('on',radio.on); b.querySelector('span').textContent = radio.on?'关机':'开机'; b.title = radio.on?'关机':'开机收听'; $('#radio').classList.toggle('off',!radio.on); radioOnTune(); }
+
+/* ---- panel UI ---- */
+let radioPanelOpen=false;
+const rp=$('#radio');
+const LCDS={s:0, st:null, name:'', msg:''};
+function renderRadio(s, st){
+  if(s===undefined){ const n=nearest(fExact); s=n.s; st=n.st; }
+  const tuned = s>0.5 && st;
+  LCDS.s = radio.on? s:0; LCDS.st=st;
+  LCDS.name = radio.on ? (tuned ? st.name : (s>0.05 ? '… '+st.name+' …' : '—— 无电台 ——')) : '';
+  $('#rTabF').textContent = state.f;
+  $('#rTabN').textContent = !radio.on ? '关机' : (tuned ? st.name : 'kHz');
+  const msg = !radio.on ? '已关机 · 点底部“开机”按钮' :
+    !(s>0.05) ? '沙沙…继续转动旋钮寻找电台' :
+    ({idle:'', loading:'正在连接直播… '+srcLabel(radio.src), search:'内置直播源都连不上，正在 radio-browser 公共目录中搜索…', playing: (s>0.85?'正在收听':'信号偏弱，微调旋钮')+' · 来源：'+srcLabel(radio.src)+(radio.audio===radio.aP?'（该源不允许读取音频，频谱不可用）':''), offline:'未联网：模型可用，但无法接收直播',
+      error:'所有直播源都连接失败（可在电台表中添加新地址）', nostream:'这是一座真实的中波台，但暂未找到它的网络直播流——只能听到噪声（可在电台表中补充地址）', gesture:'浏览器拦截了自动播放：请点一下“开机”或任一电台按钮'})[radio.net]||'';
+  $('#rMsg').textContent=msg;
+  document.querySelectorAll(".stn").forEach(b=>b.classList.toggle('on', tuned && +b.dataset.f===st.f));
+}
+/* ---- amber LCD (DSEG7 seven-segment digits, signal icon, live spectrum) ---- */
+const lcd=$('#lcd'), lg=lcd.getContext('2d'); const specBuf=new Uint8Array(256); const specSm=new Float32Array(26); const SIMA={env:0, t:new Float32Array(26)};
+let dsegReady=false; if(document.fonts&&document.fonts.load) document.fonts.load('80px "DSEG7"','0123').then(()=>{dsegReady=true;}).catch(()=>{});
+function drawLCD(){
+  const W=lcd.width, H=lcd.height, on=radio.on;
+  const gr=lg.createLinearGradient(0,0,0,H);
+  if(on){ gr.addColorStop(0,'#fbc553'); gr.addColorStop(.55,'#f5ae31'); gr.addColorStop(1,'#ea981f'); } else { gr.addColorStop(0,'#3b3223'); gr.addColorStop(1,'#2c2519'); }
+  lg.fillStyle=gr; lg.fillRect(0,0,W,H);
+  if(on){ const rg=lg.createRadialGradient(W*.45,H*.45,10,W*.45,H*.45,W*.6); rg.addColorStop(0,'rgba(255,242,195,.30)'); rg.addColorStop(1,'rgba(255,242,195,0)'); lg.fillStyle=rg; lg.fillRect(0,0,W,H); }
+  const INK= on?'#2a1606':'rgba(0,0,0,.35)', GHOST= on?'rgba(70,35,0,.085)':'rgba(0,0,0,.16)';
+  const P=20;
+  // --- frequency digits (seven-segment) ---
+  const fs=108; lg.font=`${fs}px "DSEG7", monospace`; lg.textBaseline='alphabetic'; lg.textAlign='left';
+  const m=lg.measureText('8888'); const dW=m.width, asc=m.actualBoundingBoxAscent||fs*0.9;
+  const x0=74, top=30, base=top+asc;
+  lg.fillStyle=GHOST; lg.fillText('8888',x0,base);
+  if(on){ lg.fillStyle=INK; lg.fillText(String(state.f).padStart(4,'!'),x0,base); }
+  // band (bottom-left of digits) and unit (top-right of digits)
+  lg.fillStyle=INK; lg.font='800 22px -apple-system,"Helvetica Neue",Arial,sans-serif';
+  lg.textBaseline='alphabetic'; lg.fillText('MW',P,base);
+  lg.textBaseline='top'; lg.font='700 19px -apple-system,"Helvetica Neue",Arial,sans-serif'; lg.fillText('kHz',x0+dW+8,top-1);
+  // station name, small, under the digits
+  lg.textBaseline='top'; lg.font='600 19px -apple-system,"PingFang SC","Microsoft YaHei",sans-serif';
+  lg.save(); lg.beginPath(); lg.rect(x0-2,base+10,dW+70,28); lg.clip(); lg.fillText(on?LCDS.name:'',x0,base+13); lg.restore();
+  // signal icon (top-right, no text)
+  const lv=Math.round(LCDS.s*5), bx=W-P-5*9+3;
+  for(let i=0;i<5;i++){ const bh=4+i*3.2; lg.fillStyle=(on && i<lv)?INK:GHOST; lg.fillRect(bx+i*9, 24-bh, 6, bh); }
+  // spectrum: top aligned with the digits' top, bottom with their baseline
+  const sx=x0+dW+62, sw=W-P-sx, sTop=top+2, sBot=base, sh=sBot-sTop, n=specSm.length, bw=sw/n;
+  let live=false; if(on && radio.analyser){ radio.analyser.getByteFrequencyData(specBuf); live=true; }
+  // last resort (no access to the samples at all, e.g. native-HLS browsers): animated level display driven by the tuning strength
+  const blind = on && radio.net==='playing' && !routedNow() && !TAP.ok && !TAP.live;
+  if(blind){ const t=performance.now()/1000; SIMA.env = 0.6+0.4*Math.sin(t*2.1)*Math.sin(t*0.73+1.3); }
+  for(let i=0;i<n;i++){
+    const b0=Math.floor(Math.pow(i/n,1.7)*110)+1, b1=Math.floor(Math.pow((i+1)/n,1.7)*110)+2; let v=0; if(live){ for(let k=b0;k<b1;k++) v=Math.max(v,specBuf[k]); v/=255; }
+    if(blind){ if(Math.random()<0.35) SIMA.t[i]=Math.random(); const shape=Math.exp(-Math.pow((i-5)/9,2))*0.85+0.1; v=Math.max(v, LCDS.s*shape*SIMA.env*(0.45+0.55*SIMA.t[i])); }
+    specSm[i]=Math.max(v, specSm[i]*0.85);
+    const cells=Math.floor(sh/6), lit=Math.round(specSm[i]*cells);
+    for(let c=0;c<cells;c++){ lg.fillStyle= (c<lit)?INK:GHOST; lg.fillRect(sx+i*bw+0.5, sBot-(c+1)*6+1.5, bw-2, 4.2); }
+  }
+  // glass glare
+  const gl=lg.createLinearGradient(0,0,0,H*0.5); gl.addColorStop(0,'rgba(255,255,255,.16)'); gl.addColorStop(1,'rgba(255,255,255,0)'); lg.fillStyle=gl; lg.fillRect(0,0,W,H*0.45);
+}
+(function lcdLoop(){ if(radioPanelOpen && !radioFolded) drawLCD(); requestAnimationFrame(lcdLoop); })();
+function buildStationChips(){
+  const el=$('#rList'); el.innerHTML = STATIONS.slice().sort((a,b)=>a.f-b.f).map(s=>`<button class="stn" data-f="${s.f}"><b>${s.f}</b>${escapeHtml(s.name)}</button>`).join('');
+}
+function escapeHtml(t){ return String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+let tuneAnim=null;
+function tuneTo(f){ if(needPower()) return; const target=STATIONS.find(x=>x.f===f); if(target && target!==radio.cur){ clearTimeout(radio.t); switchTo(target); }
+  const f0=fExact, t0=performance.now(), dur=700;
+  cancelAnimationFrame(tuneAnim); const step=now=>{ const k=ease(Math.min(1,(now-t0)/dur)); setFreq(f0+(f-f0)*k); if(k<1) tuneAnim=requestAnimationFrame(step); }; tuneAnim=requestAnimationFrame(step); }
+$('#rList').addEventListener('click',e=>{ const b=e.target.closest(".stn"); if(b) tuneTo(+b.dataset.f); });
+for(const ev of ['input','change']) $('#rVol').addEventListener(ev,e=>{ ensureCtx(); setVolume(e.target.value/100); if(ev==='change') kickNow(); });
+$('#rClose').onclick=()=>foldRadio(true);   // closing the panel only tucks it away; power stays with the 开机/关机 button
+let radioFolded=false;
+function foldRadio(f){ radioFolded=f; rp.classList.toggle('hidden', f || !radioPanelOpen); $('#rTab').classList.toggle('hidden', !(f && radioPanelOpen)); viewOffset(); if(APP && state.target<=0.5) ctl.tR=appFitR(); }
+$('#rFold').onclick=()=>foldRadio(true);
+$('#rTab').onclick=()=>foldRadio(false);
+function renderEditor(){
+  const tb=$('#rEdit tbody');
+  tb.innerHTML = STATIONS.map((s,i)=>`<tr data-i="${i}"><td><input type="number" min="530" max="1620" value="${s.f}" data-k="f"></td><td><input value="${escapeHtml(s.name)}" data-k="name"></td><td><input value="${escapeHtml((s.urls||[]).join(' '))}" data-k="urls" placeholder="直播地址（多个用空格分隔）"></td><td><button class="del" title="删除">✕</button></td></tr>`).join('');
+}
+$('#rEdit').addEventListener('change',e=>{ const inp=e.target.closest('input'); if(!inp) return; const i=+inp.closest('tr').dataset.i; const k=inp.dataset.k; STATIONS[i][k] = k==='f'? clamp(Math.round(+inp.value||FMIN),FMIN,FMAX) : k==='urls'? inp.value.trim().split(/\s+/).filter(Boolean) : inp.value.trim(); saveStations(); buildStationChips(); radio.cur=null; radioOnTune(); });
+$('#rEdit').addEventListener('click',e=>{ const b=e.target.closest('.del'); if(!b) return; STATIONS.splice(+b.closest('tr').dataset.i,1); saveStations(); renderEditor(); buildStationChips(); radio.cur=null; radioOnTune(); });
+$('#rAdd').onclick=()=>{ STATIONS.push({f:state.f, name:'新电台', area:'', urls:[]}); saveStations(); renderEditor(); buildStationChips(); };
+$('#rReset').onclick=()=>{ STATIONS=DEFAULT_STATIONS.map(s=>({...s, urls:[...s.urls]})); saveStations(); renderEditor(); buildStationChips(); radio.cur=null; radioOnTune(); };
+function showRadioPanel(){ radioPanelOpen=true; if(!radioFolded) rp.classList.remove('hidden'); else $('#rTab').classList.remove('hidden'); $('#bRadio').classList.add('on'); }
+function toggleRadioPanel(open){
+  const want = open===undefined ? !radioPanelOpen : open;
+  if(want){
+    radioFolded=false; $('#rTab').classList.add('hidden');
+    showRadioPanel();
+    if(state.flow!==null) exitFlow(); clearSel();
+    if(APP){ setTimeout(()=>{ viewOffset(); appView(); },0); } else { state.target=0; syncExplodeBtn(); ctl.tTarget.set(10,2,4); ctl.tTheta=.5; ctl.tPhi=1.3; ctl.tR=window.innerWidth<760?340:250; }
+    ensureCtx(); if(!radio.on){ radio.on=true; if(radio.vol<0.05) radio.vol=0.5; volPivot.rotation.x=-radio.vol*PI*1.4; $('#rVol').value=Math.round(radio.vol*100); syncPower(); }
+    kickNow();
+  } else { radioPanelOpen=false; radioFolded=false; rp.classList.add('hidden'); $('#rTab').classList.add('hidden'); $('#bRadio').classList.remove('on'); radio.on=false; syncPower(); stopStream(); radio.cur=null; }
+}
+$('#bRadio').onclick=()=>toggleRadioPanel(!radio.on);
+buildStationChips(); renderEditor(); volPivot.rotation.x=-radio.vol*PI*1.4; $('#rVol').value=Math.round(radio.vol*100); syncPower();
+
+new MutationObserver(()=>viewOffset()).observe(rp,{attributes:true, attributeFilter:['class']});
+const knobHint=$('#knobHint'); let knobUsed=false;
+(function hintLoop(){
+  const show = radioPanelOpen && !knobUsed && PID.dial.obj.visible;
+  if(show){ const w=new V3(); PID.dial.obj.getWorldPosition(w); w.x+=4; w.y+=8; w.z+=9; w.project(camera); knobHint.style.left=((w.x+1)/2*window.innerWidth)+'px'; knobHint.style.top=((1-w.y)/2*window.innerHeight)+'px'; }
+  knobHint.style.opacity = show?1:0;
+  requestAnimationFrame(hintLoop);
+})();
+window.__knob={knobHit, radio, TAP, SPATIAL, get stations(){return STATIONS;}};
+
+/* stall watchdog: if a live stream stops advancing, reconnect it */
+setInterval(()=>{
+  const a=radio.audio; if(!radio.on || !radio.cur || radio.net!=='playing' && radio.net!=='loading'){ radio.lastT=null; return; }
+  if(radio.net==='playing'){ if(radio.lastT!=null && Math.abs(a.currentTime-radio.lastT)<0.05){ radio.stallN=(radio.stallN||0)+1; if(radio.stallN>=4){ radio.stallN=0; console.warn('[2P3] 直播卡住，重连'); nextSource('stall'); } } else radio.stallN=0; radio.lastT=a.currentTime; }
+}, 2500);
+
+applyTune(); applyPositions(); applyLooks(); resetView(); ctl.theta=.4; ctl.phi=1.25; ctl.r=260*(window.innerWidth<760?1.6:1); ctl.target.copy(ctl.tTarget);
+syncExplodeBtn();
+requestAnimationFrame(loop);
+const ld=$('#loading'); ld.style.opacity=0; setTimeout(()=>ld.remove(),600);
+if(APP){ if(window.innerWidth>760) $('#parts').classList.add('hid'), $('#pTab').classList.add('show'); appView(); ctl.theta=ctl.tTheta; ctl.phi=ctl.tPhi; ctl.r=ctl.tR*1.15; ctl.target.copy(ctl.tTarget); viewOffset(); }
+else setTimeout(()=>{ state.target=1; syncExplodeBtn(); ctl.tR=430*(window.innerWidth<760?1.6:1); ctl.tTheta=2.2; ctl.tPhi=1.1; ctl.tTarget.set(0,2,-8); },900);
+window.__radio={PARTS,PID,state,ctl,camera,scene,renderer};
+})();
+</script>
+</body>
+</html>
