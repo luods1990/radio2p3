@@ -120,16 +120,18 @@ html.sheet-open #ui{z-index:25}
 .chip.on{background:var(--ink);color:#14120F;border-color:transparent;font-weight:700}
 .shb{flex:1;min-height:0;overflow:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y;opacity:0;transition:opacity .2s;padding:0 8px calc(24px + var(--sb))}
 .sheet.open .shb{opacity:1}
+#stRegion{margin:4px 12px 6px} #stRegion button{flex:1}
 #stFilter{display:flex;gap:8px;padding:6px 12px 10px}
 #stSearch{display:none;margin:0 12px 10px;height:40px;padding:0 14px;border-radius:12px;border:1px solid var(--line);background:var(--bg0);color:var(--ink);font:inherit;font-size:14px;outline:none;width:calc(100% - 24px)}
 #stSearch.show{display:block}
 .fbtn{height:34px;padding:0 14px;border-radius:17px;border:1px solid var(--line2);background:transparent;color:var(--ink2);font-size:13px}
 .fbtn.on{background:var(--ink);color:#14120F;border-color:transparent;font-weight:700}
-.stn{width:100%;height:52px;display:flex;align-items:center;gap:16px;padding:0 12px;border:0;border-radius:14px;background:transparent;color:var(--ink);text-align:left}
+.stn{width:100%;height:58px;display:flex;align-items:center;gap:16px;padding:0 12px;border:0;border-radius:14px;background:transparent;color:var(--ink);text-align:left}
 .stn .fq{width:82px;flex:none;display:flex;justify-content:flex-end;align-items:baseline;gap:4px}
 .stn .fq b{font-size:17px;font-weight:600;color:var(--ink2)}
 .stn .fq small{width:26px;font-size:11px;color:var(--ink3)}
-.stn .nm{flex:1;font-size:16px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stn .nm{flex:1;min-width:0;font-size:16px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stn .nm small{display:block;margin-top:2px;font-size:12px;font-weight:400;color:var(--ink3);overflow:hidden;text-overflow:ellipsis}
 .stn .eq{display:none;align-items:flex-end;gap:2px;height:16px;width:20px}
 .stn .eq i{width:3px;border-radius:1px;background:var(--amber);animation:eq 1s ease-in-out infinite}
 .stn .eq i:nth-child(1){height:8px;animation-delay:-.2s}.stn .eq i:nth-child(2){height:15px;animation-delay:-.5s}.stn .eq i:nth-child(3){height:11px;animation-delay:-.8s}.stn .eq i:nth-child(4){height:5px;animation-delay:-.35s}
@@ -263,6 +265,7 @@ html.sheet-open #ui{z-index:25}
         <div class="acts"><button class="ib" id="stFind" aria-label="搜索电台"><svg class="i" width="20" height="20" viewBox="0 0 24 24" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button></div></div>
       <div id="recentBox"><div class="lab">最近收听</div><div id="recent" class="chips"></div></div>
       <div class="shb">
+        <div id="stRegion" class="seg" role="tablist" aria-label="地区"><button data-r="hb" role="tab">湖北</button><button data-r="sz" role="tab">深圳龙岗</button></div>
         <input id="stSearch" type="search" placeholder="搜索电台名称或频率" aria-label="搜索电台">
         <div id="stFilter"><button class="fbtn on" data-k="all"></button><button class="fbtn" data-k="recent">最近收听</button></div>
         <div id="rList"></div>
@@ -300,10 +303,10 @@ html.sheet-open #ui{z-index:25}
         <p>听广播：轻点电源开机；按住机身侧面的调谐拨盘拖动可以调台，拖动时左侧会出现放大镜，放大刻度窗口；也可以在底部电台列表里直接选台；拖动音量条调节音量。转动机身时，声音会随喇叭朝向变化。<br>看拆解：拖动“组装 ↔ 分解”滑杆拆开机器；点任一零件查看它的作用；单指拖动旋转视角，双指缩放。</p></details>
       <details><summary>数据来源与说明<svg class="i" width="18" height="18" viewBox="0 0 24 24" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></summary>
         <p>外形依据公开资料与实物照片建模；元件位号与参数按典型 2P3 电路整理，个别数值可能因套件批次不同而有差异。中波频率据公开中波频率表（湖北全省 + 中央台），部分频率可能已调整；每台配多个直播源（蜻蜓FM / 央广云听等），连不上会自动换下一个。需联网收听。</p></details>
-      <div class="row">版本<span class="mono">1.5</span></div>
+      <div class="row">版本<span class="mono">1.6</span></div>
       <div class="row">播放通道<span class="mono" id="pathInfo">未播放</span></div>
     </div>
-    <p class="disc">外形依据公开资料与实物照片建模，电台为湖北省内中波直播流，仅供个人学习演示。</p>
+    <p class="disc">外形依据公开资料与实物照片建模，电台分“湖北”“深圳龙岗”两组，播放的是各台的网络直播流，仅供个人学习演示。</p>
   </div>
 </aside>
 
@@ -1348,17 +1351,19 @@ function drawPCB(g,w,h,bottom){
   for(const [x,y] of MOUNT) s.holes.push(holeOf(circPts(x,y,1.25,14)));
   s.holes.push(holeOf(circPts(SPK.x,SPK.y,SPK_HOLE,48)));
   s.holes.push(holeOf(rrectPts(CUT.x1-CUT.x0,CUT.y1-CUT.y0,0.8,(CUT.x0+CUT.x1)/2,(CUT.y0+CUT.y1)/2,3)));
-  g.add(extrude(s,PCB.front-PCB.back,std(0xd8cf9c,{roughness:.7}),PCB.back));
+  // v1.6: the board's faces are solder-mask green and pushed back in depth, so if the printed layers above ever lose the depth test
+  // (far-away phone view = little depth precision) only green-on-green shows, never the cream core (the white flicker seen on iPhone)
+  g.add(extrude(s,PCB.front-PCB.back,[std(0x17653b,{roughness:.6, polygonOffset:true, polygonOffsetFactor:2, polygonOffsetUnits:2}), std(0xd8cf9c,{roughness:.7})],PCB.back));
   const cx=(PCB.x0+PCB.x1)/2, cy=(PCB.y0+PCB.y1)/2;
   const compT=canvasTex(PW*PS,PH*PS,(c,w,h)=>drawPCB(c,w,h,false));
   const soldT=canvasTex(PW*PS,PH*PS,(c,w,h)=>drawPCB(c,w,h,true));
-  const comp=mesh(new THREE.PlaneGeometry(PW,PH), std(0xffffff,{map:compT, roughness:.42, alphaTest:.5}), cx,cy,PCB.back-0.02); comp.rotation.y=PI; g.add(comp);
-  const sold=mesh(new THREE.PlaneGeometry(PW,PH), std(0xffffff,{map:soldT, roughness:.42, alphaTest:.5}), cx,cy,PCB.front+0.02); g.add(sold);
+  const comp=mesh(new THREE.PlaneGeometry(PW,PH), std(0xffffff,{map:compT, roughness:.42, alphaTest:.5, polygonOffset:true, polygonOffsetFactor:-1, polygonOffsetUnits:-2}), cx,cy,PCB.back-0.04); comp.rotation.y=PI; g.add(comp);
+  const sold=mesh(new THREE.PlaneGeometry(PW,PH), std(0xffffff,{map:soldT, roughness:.42, alphaTest:.5, polygonOffset:true, polygonOffsetFactor:-1, polygonOffsetUnits:-2}), cx,cy,PCB.front+0.04); g.add(sold);
   const dome=new THREE.SphereGeometry(1,12,6,0,PI*2,0,PI/2); dome.rotateX(PI/2);
   const pads=PAD_LIST.filter(p=>!p.name.startsWith('w.'));
   const blobs=new THREE.InstancedMesh(dome, MAT.tin, pads.length);
   const m=new THREE.Matrix4(), q=new THREE.Quaternion();
-  pads.forEach((p,i)=>{ m.compose(new V3(p.x,p.y,PCB.front+0.03), q, new V3(1.05,1.05,0.7)); blobs.setMatrixAt(i,m); });
+  pads.forEach((p,i)=>{ m.compose(new V3(p.x,p.y,PCB.front+0.05), q, new V3(1.05,1.05,0.7)); blobs.setMatrixAt(i,m); });
   g.add(blobs);
   addPart('pcb', g, {name:'印刷电路板', des:'PCB', cat:'board', stage:'board', off:[0,0,-4], delay:.17, label:'电路板',
     spec:'FR-4 双面板 · 约 104×68 mm · 中央开 Ø24 圆孔',
@@ -1434,6 +1439,9 @@ function applyCam(){
   const sp=Math.sin(ctl.phi);
   camera.position.set(ctl.target.x+ctl.r*sp*Math.sin(ctl.theta), ctl.target.y+ctl.r*Math.cos(ctl.phi), ctl.target.z+ctl.r*sp*Math.cos(ctl.theta));
   camera.lookAt(ctl.target);
+  // v1.6: near plane follows the viewing distance — a fixed 2 mm near plane at the ~900 mm phone teardown distance leaves too little
+  // depth precision and thin layers (PCB print, decals) flicker; 12 % of the distance keeps 7 mm … 190 mm clear in front of the camera
+  const nr=Math.max(2, ctl.r*0.12); if(Math.abs(nr-camera.near)>camera.near*0.03){ camera.near=nr; camera.updateProjectionMatrix(); }
 }
 const ptrs=new Map(); let downPos=null, moved=0, pinch0=null;
 canvas.addEventListener('contextmenu',e=>e.preventDefault());
@@ -1772,7 +1780,57 @@ const DEFAULT_STATIONS = [
   {f:1566, name:'孝感新闻综合广播', area:'孝感',              urls:[QTHW(5022064), QT(5022064)]},
   {f:1584, name:'随州综合广播',     area:'随州',              urls:[QT(20853), QTHW(20853)]},
 ];
-let STATIONS = DEFAULT_STATIONS.filter(s=>s.urls.length).map(s=>({...s, urls:[...s.urls]}));   // only stations that have a live stream
+/* 深圳龙岗 · 用户实测已确认的中波台（2026-11-07 收台记录 V8）。只收有网络直播源、并在网页里实测能播的台；
+   去掉的：585 东南广播（直播流加密）、864 香港商业电台（无公开直播流）、963 台广中兴、1179 国声、1215 天声、1224 华声二台（只有 http 直播流，网页/iPhone 无法播放） */
+const RTHK = k => `https://rthkradio${k}-live.akamaized.net/hls/live/${{3:2040079,5:2040081,pth:2040082}[k]}/radio${k}/master.m3u8`;
+const THZS=CNRSAT('wxzhzs'), SZZS=CNRSAT('wxszzs'), JJZS=[CNRSAT('wxjjzs'), NG_JJZS], ZGZS=[CNRSAT('wxzgzs'), NG_ZGZS];
+const GDXW=[QT(1254), QTHW(1254), CNRSAT('wxgdxwgb')], FJXW=[QT(1731), QTHW(1731)], YUYE='https://n03.rcs.revma.com/mk0c5vq122hvv';
+const SZ_STATIONS = [
+  {f:549,  name:'台海之声',         area:'中央台',                    urls:[THZS]},
+  {f:567,  name:'香港电台第三台',   area:'香港 · 英语',               urls:[RTHK(3), 'https://rthkaudio3-lh.akamaihd.net/i/radio3_1@355866/master.m3u8']},
+  {f:612,  name:'广东文体广播',     area:'广东台',                    urls:[QT(471), QTHW(471)]},
+  {f:621,  name:'香港电台普通话台', area:'香港',                      urls:[RTHK('pth')]},
+  {f:630,  name:'经济之声',         area:'中央台',                    urls:[...JJZS]},
+  {f:648,  name:'广东新闻广播',     area:'广东台（同频：台湾中广新闻网）', urls:[...GDXW]},
+  {f:684,  name:'神州之声',         area:'中央台',                    urls:[SZZS]},
+  {f:702,  name:'江苏新闻综合广播', area:'江苏台（同频：广西新闻综合广播）', urls:['https://lzlive.vojs.cn/rTyLc36/92/live.m3u8']},
+  {f:720,  name:'经济之声',         area:'中央台',                    urls:[...JJZS]},
+  {f:729,  name:'江西新闻广播',     area:'江西台',                    urls:[QT(1809), QTHW(1809)]},
+  {f:738,  name:'台湾渔业广播电台', area:'台湾',                      urls:[YUYE]},
+  {f:765,  name:'台海之声',         area:'中央台',                    urls:[THZS]},
+  {f:774,  name:'湖北之声',         area:'湖北台',                    urls:[QT(1303), QTHW(1303), HB]},
+  {f:783,  name:'香港电台第五台',   area:'香港 · 粤语',               urls:[RTHK(5)]},
+  {f:792,  name:'广西综合广播',     area:'广西台 · 新闻910',          urls:[QTHW(1753), QT(1753), 'https://stream.bbrtv.com:10443/hls/sIoyCf1Gg/sIoyCf1Gg_live.m3u8']},
+  {f:810,  name:'浙江之声',         area:'浙江台',                    urls:['https://ali-m-l.cztv.com/channels/lantian/fm88/128k.m3u8', CNRSAT('wxzjzs')]},
+  {f:819,  name:'越南之声第二台',   area:'越南 · VOV2',               urls:['https://str.vov.gov.vn/vovlive/vov2.sdp_aac/playlist.m3u8']},
+  {f:828,  name:'广东新闻广播',     area:'广东台',                    urls:[...GDXW]},
+  {f:837,  name:'台海之声',         area:'中央台',                    urls:[THZS]},
+  {f:882,  name:'福建新闻广播',     area:'福建台',                    urls:[...FJXW]},
+  {f:909,  name:'神州之声',         area:'中央台',                    urls:[SZZS]},
+  {f:999,  name:'广东南方生活广播', area:'广东台',                    urls:[QT(468), QTHW(468)]},
+  {f:1017, name:'广东新闻广播',     area:'广东台',                    urls:[...GDXW]},
+  {f:1044, name:'新城采讯台',       area:'香港',                      urls:['https://1946218710.rsc.cdn77.org/1946218710/index.m3u8']},
+  {f:1089, name:'神州之声',         area:'中央台',                    urls:[SZZS]},
+  {f:1098, name:'台湾之音',         area:'台湾 · 中央广播电台',       urls:['https://streamak0138.akamaized.net/live0138lh-mbm9/_definst_/rti3/chunklist.m3u8']},
+  {f:1143, name:'台湾渔业广播电台', area:'台湾',                      urls:[YUYE]},
+  {f:1197, name:'中国之声',         area:'中央台',                    urls:[...ZGZS]},
+  {f:1278, name:'厦门交通旅游广播', area:'厦门台',                    urls:[QT(1738), QTHW(1738)]},
+  {f:1287, name:'经济之声',         area:'中央台',                    urls:[...JJZS]},
+  {f:1296, name:'民本广播第一台',   area:'台湾（同频：中广新闻网）',  urls:['https://streamak0134.akamaized.net/live0134lh-5gst/_definst_/am1296/chunklist.m3u8']},
+  {f:1332, name:'福建新闻广播',     area:'福建台',                    urls:[...FJXW]},
+  {f:1368, name:'福建新闻广播',     area:'福建台',                    urls:[...FJXW]},
+  {f:1377, name:'中国之声',         area:'中央台',                    urls:[...ZGZS]},
+  {f:1386, name:'福建新闻广播',     area:'福建台',                    urls:[...FJXW]},
+  {f:1440, name:'中国之声',         area:'中央台',                    urls:[...ZGZS]},
+];
+/* v1.6: two station tables — the original Hubei list and the user's own Shenzhen Longgang log (only stations with a working live stream) */
+const REGIONS = {
+  hb:{name:'湖北',     title:'湖北中波',     list:DEFAULT_STATIONS, rkey:'tecsun2p3.recent',    recent:[774,639,1125]},
+  sz:{name:'深圳龙岗', title:'深圳龙岗中波', list:SZ_STATIONS,      rkey:'tecsun2p3.recent.sz', recent:[828,567,1197]},
+};
+let REGION = (()=>{ try{ const r=localStorage.getItem('tecsun2p3.region'); if(REGIONS[r]) return r; }catch(e){} return 'hb'; })();
+const mkStations = k => REGIONS[k].list.filter(s=>s.urls.length).map(s=>({...s, urls:[...s.urls]}));   // only stations that have a live stream
+let STATIONS = mkStations(REGION);
 const fFromFrac = fr => { let lo=FMIN, hi=FMAX; for(let i=0;i<40;i++){ const m=(lo+hi)/2; if(frac(m)<fr) lo=m; else hi=m; } return (lo+hi)/2; };
 let fExact = state.f;
 function setFreq(f, fromSlider){
@@ -2045,7 +2103,7 @@ function updateSpatial(){
   SPATIAL.cut  = 650*Math.pow(18000/650, Math.pow(f01,1.15));        // back ≈ 650 Hz (muffled) → front 18 kHz
   SPATIAL.pres = -9 + 13*f01;                                         // presence: +4 dB facing you, −9 dB turned away
   SPATIAL.box  = 7*Math.pow(1-f01,1.5);                               // boxy cabinet resonance heard from behind
-  SPATIAL.wet  = 0.04 + 0.42*Math.pow(1-f01,1.3);                     // room reverb takes over when it faces away
+  SPATIAL.wet  = 0.04 + 0.052*Math.pow(1-f01,1.3);                    // room reverb when it faces away (v1.6: back = 20 % of the old 0.46 → 0.092)
   SPATIAL.pan  = clamp(_sf.x*0.95 + clamp(_sp.x,-1.2,1.2)*0.3, -0.98, 0.98);
   const sp=radio.spatial; if(!sp || !radio.ctx) return; const t=radio.ctx.currentTime;
   sp.g.gain.setTargetAtTime(SPATIAL.gain, t, 0.05); sp.lp.frequency.setTargetAtTime(SPATIAL.cut, t, 0.05);
@@ -2225,12 +2283,12 @@ function renderRadio(s, st){
   document.querySelectorAll('.stn').forEach(b=>b.classList.toggle('on', +b.dataset.f===cur));
   document.querySelectorAll('#recent .chip').forEach(b=>b.classList.toggle('on', +b.dataset.f===cur));
 }
-const RKEY='tecsun2p3.recent';
-let RECENT=(()=>{ try{ const r=JSON.parse(localStorage.getItem(RKEY)); if(Array.isArray(r)) return r.filter(f=>STATIONS.some(s=>s.f===f)); }catch(e){} return [774,639,1125]; })();
+const loadRecent=()=>{ const R=REGIONS[REGION]; try{ const r=JSON.parse(localStorage.getItem(R.rkey)); if(Array.isArray(r)) return r.filter(f=>STATIONS.some(s=>s.f===f)); }catch(e){} return R.recent.filter(f=>STATIONS.some(s=>s.f===f)); };
+let RECENT=loadRecent();
 function pushRecent(st){
   if(!st) return; const same=STATIONS.filter(x=>x.name===st.name).map(x=>x.f);
   RECENT=[st.f].concat(RECENT.filter(f=>f!==st.f && !same.includes(f))).slice(0,6);
-  try{ localStorage.setItem(RKEY, JSON.stringify(RECENT)); }catch(e){}
+  try{ localStorage.setItem(REGIONS[REGION].rkey, JSON.stringify(RECENT)); }catch(e){}
   renderRecent(); if(stFilterK==='recent') buildStationList();
 }
 function renderRecent(){
@@ -2242,10 +2300,10 @@ function buildStationList(){
   let list=STATIONS.slice().sort((a,b)=>a.f-b.f);
   if(stFilterK==='recent') list=RECENT.map(f=>STATIONS.find(s=>s.f===f)).filter(Boolean);
   const q=stQuery.trim(); if(q) list=list.filter(s=>s.name.includes(q) || String(s.f).includes(q));
-  $('#rList').innerHTML = list.length ? list.map(s=>`<button class="stn" data-f="${s.f}"><span class="fq mono"><b>${s.f}</b><small>kHz</small></span><span class="nm">${escapeHtml(s.name)}</span><span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span></button>`).join('') : '<div class="empty">没有找到电台</div>';
+  $('#rList').innerHTML = list.length ? list.map(s=>`<button class="stn" data-f="${s.f}"><span class="fq mono"><b>${s.f}</b><small>kHz</small></span><span class="nm">${escapeHtml(s.name)}${s.area?`<small>${escapeHtml(s.area)}</small>`:''}</span><span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span></button>`).join('') : '<div class="empty">没有找到电台</div>';
   renderRadio();
 }
-function onStationSheet(open){ $('#stSub').innerHTML = open && !DESK() ? `湖北中波 · ${STATIONS.length} 个` : (radio.on ? `${STATIONS.length} 个<span class="hint-up"> · 上拉查看全部</span>` : '开机后即可选台'); if(!open){ $('#stSearch').classList.remove('show'); } }
+function onStationSheet(open){ $('#stSub').innerHTML = open && !DESK() ? `${REGIONS[REGION].title} · ${STATIONS.length} 个` : (radio.on ? `${REGIONS[REGION].name} · ${STATIONS.length} 个<span class="hint-up"> · 上拉查看全部</span>` : '开机后即可选台'); if(!open){ $('#stSearch').classList.remove('show'); } }
 $('#stFilter').addEventListener('click',e=>{ const b=e.target.closest('.fbtn'); if(!b) return; stFilterK=b.dataset.k; document.querySelectorAll('#stFilter .fbtn').forEach(x=>x.classList.toggle('on',x===b)); buildStationList(); });
 $('#stFind').onclick=()=>{ const i=$('#stSearch'); if(!$('#stSheet').classList.contains('open')) setSheet($('#stSheet'),true); i.classList.toggle('show'); if(i.classList.contains('show')) setTimeout(()=>i.focus(),50); else { i.value=''; stQuery=''; buildStationList(); } };
 $('#stSearch').addEventListener('input',e=>{ stQuery=e.target.value; buildStationList(); });
@@ -2319,7 +2377,17 @@ function drawLCD(){
 (function lcdLoop(){ if(MODE.cur==='listen') drawLCD(); requestAnimationFrame(lcdLoop); })();
 for(const el of [radio.aC,radio.aP]) el.addEventListener('playing',()=>{ if(radio.cur && el===radio.audio) pushRecent(radio.cur); });
 
-$('#stFilter .fbtn').textContent=`全部 ${STATIONS.length}`;
+function setRegion(k, quiet){
+  if(!REGIONS[k]) return; REGION=k; try{ localStorage.setItem('tecsun2p3.region',k); }catch(e){}
+  STATIONS.splice(0, STATIONS.length, ...mkStations(k));          // same array object (other code keeps a reference to it)
+  RECENT=loadRecent();
+  document.querySelectorAll('#stRegion button').forEach(b=>{ const on=b.dataset.r===k; b.classList.toggle('on',on); b.setAttribute('aria-selected',on); });
+  $('#stFilter .fbtn').textContent=`全部 ${STATIONS.length}`;
+  buildStationList(); renderRecent(); onStationSheet($('#stSheet').classList.contains('open')||DESK());
+  if(!quiet){ $('#rList').scrollTop=0; $('.shb').scrollTop=0; radioOnTune(); }
+}
+$('#stRegion').addEventListener('click',e=>{ const b=e.target.closest('button[data-r]'); if(b && b.dataset.r!==REGION) setRegion(b.dataset.r); });
+setRegion(REGION, true);
 buildStationList(); renderRecent(); volPivot.rotation.x=-radio.vol*PI*1.4; setVolume(radio.vol); syncPower(); onStationSheet(DESK());
 
 
@@ -2374,7 +2442,7 @@ function loupeRender(now){
   renderer.render(loupeScene, loupeOrtho);
   renderer.setScissorTest(false); renderer.setViewport(0,0,W,H); renderer.autoClear=ac;
 }
-window.__knob={knobHit, radio, TAP, SPATIAL, setFreq, LOUPE, get stations(){return STATIONS;}};
+window.__knob={knobHit, radio, TAP, SPATIAL, setFreq, LOUPE, camera, ctl, setRegion, get region(){return REGION;}, get stations(){return STATIONS;}};
 
 /* stall watchdog: if a live stream stops advancing, reconnect it */
 setInterval(()=>{
