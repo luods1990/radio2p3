@@ -120,7 +120,7 @@ html.sheet-open #ui{z-index:25}
 .chip.on{background:var(--ink);color:#14120F;border-color:transparent;font-weight:700}
 .shb{flex:1;min-height:0;overflow:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y;opacity:0;transition:opacity .2s;padding:0 8px calc(24px + var(--sb))}
 .sheet.open .shb{opacity:1}
-#stRegion{margin:4px 12px 6px} #stRegion button{flex:1}
+#stRegionBar{position:sticky;top:0;z-index:3;margin:0 -8px;padding:4px 20px 6px;background:var(--sheet)} #stRegion button{flex:1}
 #stFilter{display:flex;gap:8px;padding:6px 12px 10px}
 #stSearch{display:none;margin:0 12px 10px;height:40px;padding:0 14px;border-radius:12px;border:1px solid var(--line);background:var(--bg0);color:var(--ink);font:inherit;font-size:14px;outline:none;width:calc(100% - 24px)}
 #stSearch.show{display:block}
@@ -219,6 +219,7 @@ html.sheet-open #ui{z-index:25}
   .sheet .shh{padding-top:10px}
   .sheet .shh .t b{font-size:17px!important}
   .shb{opacity:1}
+  #stRegionBar{background:#1C1A17}
   #recentBox{display:block!important;padding-bottom:8px}
   html:not(.on) #recentBox{display:none!important}
   .sheet .hint-up{display:none}
@@ -265,7 +266,7 @@ html.sheet-open #ui{z-index:25}
         <div class="acts"><button class="ib" id="stFind" aria-label="搜索电台"><svg class="i" width="20" height="20" viewBox="0 0 24 24" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button></div></div>
       <div id="recentBox"><div class="lab">最近收听</div><div id="recent" class="chips"></div></div>
       <div class="shb">
-        <div id="stRegion" class="seg" role="tablist" aria-label="地区"><button data-r="hb" role="tab">湖北</button><button data-r="sz" role="tab">深圳龙岗</button></div>
+        <div id="stRegionBar"><div id="stRegion" class="seg" role="tablist" aria-label="地区"><button data-r="hb" role="tab">湖北</button><button data-r="sz" role="tab">深圳龙岗</button></div></div>
         <input id="stSearch" type="search" placeholder="搜索电台名称或频率" aria-label="搜索电台">
         <div id="stFilter"><button class="fbtn on" data-k="all"></button><button class="fbtn" data-k="recent">最近收听</button></div>
         <div id="rList"></div>
@@ -303,7 +304,7 @@ html.sheet-open #ui{z-index:25}
         <p>听广播：轻点电源开机；按住机身侧面的调谐拨盘拖动可以调台，拖动时左侧会出现放大镜，放大刻度窗口；也可以在底部电台列表里直接选台；拖动音量条调节音量。转动机身时，声音会随喇叭朝向变化。<br>看拆解：拖动“组装 ↔ 分解”滑杆拆开机器；点任一零件查看它的作用；单指拖动旋转视角，双指缩放。</p></details>
       <details><summary>数据来源与说明<svg class="i" width="18" height="18" viewBox="0 0 24 24" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></summary>
         <p>外形依据公开资料与实物照片建模；元件位号与参数按典型 2P3 电路整理，个别数值可能因套件批次不同而有差异。中波频率据公开中波频率表（湖北全省 + 中央台），部分频率可能已调整；每台配多个直播源（蜻蜓FM / 央广云听等），连不上会自动换下一个。需联网收听。</p></details>
-      <div class="row">版本<span class="mono">1.6</span></div>
+      <div class="row">版本<span class="mono">1.6.1</span></div>
       <div class="row">播放通道<span class="mono" id="pathInfo">未播放</span></div>
     </div>
     <p class="disc">外形依据公开资料与实物照片建模，电台分“湖北”“深圳龙岗”两组，播放的是各台的网络直播流，仅供个人学习演示。</p>
@@ -2023,7 +2024,10 @@ function startMSE(u,a,tok,fail){
     let sb; try{ sb=ms.addSourceBuffer('audio/mpeg'); sb.mode='sequence'; }catch(e){ return fail('mse '+e.name); }
     let resp; try{ resp=await fetch(u,{signal:ctrl.signal, cache:'no-store', referrerPolicy:'no-referrer', credentials:'omit'}); }catch(e){ return fail('fetch '+(e.message||e)); }
     if(!resp.ok || !resp.body) return fail('http '+resp.status);
-    const rd=resp.body.getReader(), q=[]; let started=false;
+    const rd=resp.body.getReader(), q=[]; let started=false, hold=false;
+    if(radio.mseWait) a.removeEventListener('waiting', radio.mseWait);
+    radio.mseWait=()=>{ if(tok!==radio.tok || radio.audio!==a || !started) return; let ah=0; try{ const b=sb.buffered; if(b.length) ah=b.end(b.length-1)-a.currentTime; }catch(e){} if(ah<1){ hold=true; a.pause(); } };
+    a.addEventListener('waiting', radio.mseWait);
     const pump=()=>{
       if(tok!==radio.tok || ms.readyState!=='open' || sb.updating || !q.length) return;
       try{ const b=sb.buffered; if(b.length && a.currentTime-b.start(0)>40){ sb.remove(b.start(0), a.currentTime-15); return; } }catch(e){}
@@ -2031,9 +2035,12 @@ function startMSE(u,a,tok,fail){
     };
     sb.addEventListener('updateend',()=>{
       if(tok!==radio.tok || ms.readyState!=='open') return;
-      if(!started && sb.buffered.length && sb.buffered.end(0)>0.25){ started=true; const p=a.play(); if(p&&p.catch) p.catch(()=>{}); }
-      // stay close to the live edge
-      try{ const b=sb.buffered; if(b.length){ const end=b.end(b.length-1); if(end-a.currentTime>6) a.currentTime=end-1.5; } }catch(e){}
+      // v1.6.1: live MP3 servers (e.g. 蜻蜓FM) deliver in bursts of up to ~10 s. Keep a real cushion instead of chasing the live edge:
+      //   start with ≥ 3 s buffered, after a stall wait for ≥ 4 s before resuming, and only skip ahead when more than 30 s behind
+      let ahead=0, end=0; try{ const b=sb.buffered; if(b.length){ end=b.end(b.length-1); ahead=end-a.currentTime; } }catch(e){}
+      if(!started && ahead>=3){ started=true; const p=a.play(); if(p&&p.catch) p.catch(()=>{}); }
+      if(started && hold && ahead>=4){ hold=false; const p=a.play(); if(p&&p.catch) p.catch(()=>{}); }
+      if(started && ahead>30){ try{ a.currentTime=end-8; }catch(e){} }
       pump();
     });
     let err=null; try{ for(;;){ const {done,value}=await rd.read(); if(done || tok!==radio.tok) break; q.push(value); pump(); } }catch(e){ err=e; }
@@ -2220,7 +2227,7 @@ async function tapStart(u){
       TAP.corr.push(+best.toFixed(3)); if(TAP.corr.length>20) TAP.corr.shift();
     } else {
       j = prev ? ovl*spfO : Math.min(ab.length-1, 2*spfO);         // first block (or after an underrun): skip warm-up frames
-      if(TAP.nextT<now+0.05) TAP.nextT=now+0.9;                    // (re)start with ~0.9 s of cushion against network jitter
+      if(TAP.nextT<now+0.05) TAP.nextT=now+2.5;                    // (re)start with ~2.5 s of cushion: live servers deliver in bursts (v1.6.1)
     }
     prev=ab; if(j>=ab.length) return;
     const src=ctx.createBufferSource(); src.buffer=ab; src.connect(radio.pcmGain);
